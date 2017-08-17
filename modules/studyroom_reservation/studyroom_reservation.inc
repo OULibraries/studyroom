@@ -264,7 +264,7 @@ class StudyroomReservationController extends EntityAPIController {
         $reservation->label = $function();
       }
       else {
-        $reservation->label = t('RESERVED');
+        $reservation->label = t('Reserved');
       }
     }
 

@@ -246,7 +246,7 @@ class SpaceAvailability {
     }
 
     /* l('available', "reservation/add/$url", array('attributes' => array('class' => 'ctools-use-modal'))) */
-    return ($link) ? l(t('available'), "reservation/add/$url") : 'available';
+    return ($link) ? l(t('Available'), "reservation/add/$url") : 'available';
   }
 
   /**
