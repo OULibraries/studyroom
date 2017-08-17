@@ -151,8 +151,12 @@ td.day.empty, td.day.empty.today {
 }
 
 td.day.empty a {
-background-color:#c0e4cd;
-padding:4px 28%;
-margin-left:-3px;
-color:#c0e4cd; 
+/* background-color:#7a7979; */
+/* padding:4px 28%; */
+/* margin-left:-3px; */
+color:#7a7979; 
+}
+
+td.notempty {
+background-color:#c0e4cd !important;
 }
