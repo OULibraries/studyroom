@@ -116,7 +116,7 @@ class SpaceAvailability {
   public function spaceAvailabilityByWeek($entity, $year, $week) {
     $this->user_types = studyroom_reservation_type_user_access();
     $this->reservations = studyroom_reservation_per_space_per_range($entity, $year, $week);
-    $this->entity = $entity; dpm($entity);
+    $this->entity = $entity; 
 
     // Get studyroom values.
     $studyroom = new Studyroom();
@@ -145,7 +145,7 @@ class SpaceAvailability {
         $type = '';
         $rows[$x]['values'][$id]['class'][] = 'day';
 
-	if ($time >= $this->week[$id]['start_time'] && $time <= $this->week[$id]['end_time']+3600) {
+	if ($time >= $this->week[$id]['start_time'] && $time <= $this->week[$id]['end_time']) {
           // Its a good time of day.
           if (isset($this->reservations[$column['fulldate']])) {
             $loop_time = strtotime($column['fulldate'] . ' ' . date_format_date($time, 'custom', 'H:i:s'));
@@ -177,6 +177,7 @@ class SpaceAvailability {
               else {
                 $datetime = strtotime($column['fulldate'] . $time->format('H:i'));
                 $rows[$x]['values'][$id]['entry'] = $this->cellAvailable($datetime, $column['days_advance']);
+                $rows[$x]['values'][$id]['class'][] = 'notempty';
               }
             }
             else {
@@ -245,7 +246,7 @@ class SpaceAvailability {
     }
 
     /* l('available', "reservation/add/$url", array('attributes' => array('class' => 'ctools-use-modal'))) */
-    return ($link) ? l(t('available'), "reservation/add/$url") : 'available';
+    return ($link) ? l(t('Available'), "reservation/add/$url") : 'available';
   }
 
   /**
