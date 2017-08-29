@@ -301,6 +301,24 @@ function studyroom_reservation_types_options($public_only = TRUE) {
 }
 
 /**
+ * @param bool $published
+ * @return array
+ * Filter by space name in the reservation view
+ */
+function studyroom_reservation_spaces_options($published = FALSE){
+
+  $allSpaces= entity_load_multiple_by_name('studyroom_space');
+  $options[] = ' ';
+
+  foreach ($allSpaces as $spaces) {
+      $options[] = $spaces->location_label . ' - ' .
+        $spaces->label;
+    }
+
+  return isset($options) ? $options : array();
+}
+
+/**
  * Return array of non-public reservation types.
  */
 function studyroom_reservation_types_admin() {

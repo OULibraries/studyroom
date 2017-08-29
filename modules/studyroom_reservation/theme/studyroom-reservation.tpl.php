@@ -36,7 +36,7 @@
     </h2>
   <?php endif; ?>
 
-  <div class="content"<?php print $content_attributes; ?>>
+  <div class="content"<?php print $content_attributes; ?>> hello
     <?php
       print render($content);
     ?>
