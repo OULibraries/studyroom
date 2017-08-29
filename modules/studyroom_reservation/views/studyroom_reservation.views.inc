@@ -42,6 +42,12 @@ function studyroom_reservation_views_data_alter(&$data) {
     'field' => array(
       'handler' => 'studyroom_reservation_handler_field_space',
     ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'studyroom_reservation_handler_filter_space',
+    ),
   );
   // Expose the creator uid.
   $data['studyroom_reservation']['uid'] = array(
