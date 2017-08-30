@@ -56,7 +56,7 @@ class SpaceAvailability {
 
         if ($space->hour_limits !== FALSE && ($time >= $space->hour_limits['start_time'] && $time < $space->hour_limits['end_time'])) {
           // Its a good time of day.
-          if (!empty($space->reservations)) { dpm($reservation->end_time);
+          if (!empty($space->reservations)) {
             $loop_time = strtotime(date_format_date($date, 'custom', 'd-m-Y') . ' ' . date_format_date($time, 'custom', 'H:i:s'));
             foreach ($space->reservations as $reservation) {
               if ($loop_time >= $reservation->start_time && $loop_time < $reservation->end_time) {
