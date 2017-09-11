@@ -492,7 +492,6 @@ function studyroom_space_preprocess_entity_studyroom_space(&$variables) {
     }
 
 
-kpr($items);
     if ($args[2] == 'day') {
       $variables['content']['availability'] = array(
         '#markup' => theme('studyroom_availability_singleday', array(
