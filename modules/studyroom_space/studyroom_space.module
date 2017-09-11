@@ -486,14 +486,33 @@ function studyroom_space_preprocess_entity_studyroom_space(&$variables) {
     $availability->date = array('year' => $year, 'week' => $week);
     $items = $availability->spaceAvailabilityByWeek($entity, $year, $week);
 
-    $variables['content']['availability'] = array(
-      '#markup' => theme('studyroom_availability_week', array(
-        'items' => $items,
-        'availability' => $availability,
-        'space' => $entity,
-      )),
-      '#weight' => 400,
-    );
+
+    foreach ($items as $key => $value) {
+      $items[$key]['stamp'] = $key;
+    }
+
+
+    if ($args[2] == 'day') {
+      $variables['content']['availability'] = array(
+        '#markup' => theme('studyroom_availability_singleday', array(
+          'items' => $items,
+          'availability' => $availability,
+          'space' => $entity,
+        )),
+        '#weight' => 400,
+      );
+    }
+
+    else {
+      $variables['content']['availability'] = array(
+        '#markup' => theme('studyroom_availability_week', array(
+          'items' => $items,
+          'availability' => $availability,
+          'space' => $entity,
+        )),
+        '#weight' => 400,
+      );
+    }
   }
 
   // Add node-unpublished class if necessary.

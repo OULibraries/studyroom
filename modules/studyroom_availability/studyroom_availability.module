@@ -73,6 +73,14 @@ function studyroom_availability_theme() {
       ),
       'template' => 'studyroom-availability-week',
     ),
+    'studyroom_availability_singleday' => $base + array(
+      'variables' => array(
+        'items' => array(),
+        'availability' => NULL,
+        'space' => NULL,
+      ),
+      'template' => 'studyroom-availability-singleday',
+    ),
     'studyroom_availability_search' => $base + array(
       'template' => 'studyroom-availability-search',
     ),
