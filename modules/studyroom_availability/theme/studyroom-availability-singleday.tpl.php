@@ -14,7 +14,6 @@
  */
 ?>
 <div class="studyroom-space-calendar">
-<!--  --><?php //print render($page['navigation']); ?>
   <table>
     <thead>
     <tr>
