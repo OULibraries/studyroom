@@ -486,13 +486,15 @@ function studyroom_space_preprocess_entity_studyroom_space(&$variables) {
     $availability->date = array('year' => $year, 'week' => $week);
     $items = $availability->spaceAvailabilityByWeek($entity, $year, $week);
 
-
-    foreach ($items as $key => $value) {
-      $items[$key]['stamp'] = $key;
-    }
-
-
     if ($args[2] == 'day') {
+      foreach ($items as $key => $value) {
+        $timestring = $value['hour'] . ' ' . $value['ampm'];
+        $items[$key]['stamp'] = strtotime($timestring);
+        if (time() > $items[$key]['stamp']) {
+          unset($items[$key]);
+        }
+      }
+
       $variables['content']['availability'] = array(
         '#markup' => theme('studyroom_availability_singleday', array(
           'items' => $items,
