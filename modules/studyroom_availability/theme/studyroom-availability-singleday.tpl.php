@@ -13,8 +13,8 @@
  * @ingroup themeable
  */
 ?>
-<div class="studyroom-space-calendar">
-  <table>
+<div class="studyroom-space-calendar-single-day">
+  <table class="single-day-table">
     <thead>
     <tr>
       <th class="time"><?php print t('Time')?></th>
