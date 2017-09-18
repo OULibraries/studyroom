@@ -227,7 +227,7 @@ class SpaceAvailability {
     if (!empty($types)) {
       if (count($types) == 1) {
         $type = array_shift($types);
-        $url = $type->type . '/' . $url . '/' . $day_var . '/slslsls';
+        $url = $type->type . '/' . $url . '/' . $day_var;
       }
 
       // Determine if ok to display link.
