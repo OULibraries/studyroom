@@ -29,7 +29,7 @@
     </thead>
     <tbody>
     <?php foreach ($items as $time): ; ?>
-      <tr>
+      <tr class="single-day-row">
         <td class="time">
           <span class="calendar-hour"><?php print $time['hour']; ?></span><span class="calendar-ampm"><?php print $time['ampm']; ?></span>
         </td>
