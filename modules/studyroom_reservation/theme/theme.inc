@@ -11,11 +11,13 @@
  */
 function theme_studyroom_reservation_choose_type($vars) {
   $types = $vars['types'];
+  $args = explode('/', drupal_get_path_alias());
+  $day_var = (in_array('day', $args)) ? 'day' : '';
   $output = '<h3>Choose type of reservation to create:</h3>';
   $output .= '<ul class="studyroom-reservation-type-list">';
   foreach ($types as $type) {
     if ($type->ui) {
-      $link = array('add', $type->type, $vars['space'], $vars['datetime']);
+      $link = array('add', $type->type, $vars['space'], $vars['datetime'], $day_var);
       $output .= '<li class="clearfix">';
       $output .= '<span class="label">' . l($type->label, STUDYROOM_RESERVATION_PATH . implode('/', array_filter($link))) . '</span>';
       $output .= '<div class="description">' . filter_xss_admin($type->description) . '</div>';
