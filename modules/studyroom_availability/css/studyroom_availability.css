@@ -192,3 +192,8 @@ background-color:#c0e4cd !important;
   width: 100vw;
   margin-left: -27%;
 }
+
+.single-day-row {
+  height: 40px;
+  font-size: 1.4em;
+}
