@@ -446,7 +446,13 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
 
   // Get year/week to redirect to correct week of reservation.
   $date = new DateObject($entity->start_time);
-  $url = array($entity->space_id, $date->format('Y'), date_week($date));
+  $args = explode('/', drupal_get_path_alias());
+  if(in_array('day', $args)) {
+    $url = array($entity->space_id, 'day');
+  }
+  else {
+    $url = array($entity->space_id, $date->format('Y'), date_week($date));
+  }
 
   $form_state['redirect'] = STUDYROOM_SPACE_PATH . implode('/', $url);
 }

@@ -218,6 +218,8 @@ class SpaceAvailability {
     $link = FALSE;
     $types = '';
     $url = $this->entity->space_id . '/' . $datetime;
+    $args = explode('/', drupal_get_path_alias());
+    $day_var = (in_array('day', $args)) ? 'day' : '';
     if (is_array($this->user_types) && is_array($this->entity->reservation_types)) {
       $types = array_intersect_key($this->user_types, $this->entity->reservation_types);
     }
@@ -225,7 +227,7 @@ class SpaceAvailability {
     if (!empty($types)) {
       if (count($types) == 1) {
         $type = array_shift($types);
-        $url = $type->type . '/' . $url;
+        $url = $type->type . '/' . $url . '/' . $day_var . '/slslsls';
       }
 
       // Determine if ok to display link.
@@ -246,7 +248,7 @@ class SpaceAvailability {
     }
 
     /* l('available', "reservation/add/$url", array('attributes' => array('class' => 'ctools-use-modal'))) */
-    return ($link) ? l(t('Available'), "reservation/add/$url") : 'available';
+    return ($link) ? l(t('Free'), "reservation/add/$url/$day_var") : 'Free';
   }
 
   /**
