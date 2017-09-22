@@ -54,7 +54,7 @@
 .studyroom-space-calendar-single-day table {
   border-collapse: collapse;
   border-spacing: 0;
-  margin: 0 auto 0 -27%;
+  margin: 0 auto 0 -11%;
   padding: 0;
   width: 100vw;
   clear: both;
@@ -196,4 +196,36 @@ background-color:#c0e4cd !important;
 .single-day-row {
   height: 40px;
   font-size: 1.4em;
+}
+
+/*.page-space-day .title {*/
+  /*background-color: red;*/
+/*}*/
+
+.single-day-status {
+  height: 50px;
+  width: 100vw;
+  margin-left: -11%;
+  font-size: 1.8em;
+  color: white;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.single-day-status.today-free {
+  background-color: #00AA88;
+}
+
+.single-day-status.today-closed {
+  background-color: blue;
+}
+
+.single-day-status.today-busy {
+  background-color: #f15d5d;
+}
+
+span.single-day-status-text {
+  margin-left: 15%;
+  vertical-align: middle;
+  font-family: sans-serif;
 }
