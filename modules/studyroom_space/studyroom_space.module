@@ -485,12 +485,25 @@ function studyroom_space_preprocess_entity_studyroom_space(&$variables) {
     $availability = new SpaceAvailability();
     $availability->date = array('year' => $year, 'week' => $week);
     $items = $availability->spaceAvailabilityByWeek($entity, $year, $week);
+    $lastThirty = time() - (time() % 1800);
 
+    // Check to see if 'day' is in the url...if so, pass to singleday tpl
     if ($args[2] == 'day') {
       foreach ($items as $key => $value) {
         $timestring = $value['hour'] . ' ' . $value['ampm'];
         $items[$key]['stamp'] = strtotime($timestring);
-        if (time() > $items[$key]['stamp']) {
+        $items[$key]['rightnow'] = ($lastThirty === $items[$key]['stamp']) ?
+          True : False;
+        $newArray = currentItemClass($items[$key]);
+
+        $items[$key]['statusclass'] = $newArray[1];
+        $items[$key]['statustext'] = $newArray[0];
+        $items['statusbarclass'] = ($items[$key]['statusclass'] != '-') ?
+          $items[$key]['statusclass'] : $items['statusbarclass'];
+        $items['statusText'] = ($items[$key]['statustext'] != '-') ?
+          $items[$key]['statustext'] : $items['statusText'];
+        // unset any time that has already passed
+        if ($lastThirty > $items[$key]['stamp']) {
           unset($items[$key]);
         }
       }
@@ -523,11 +536,43 @@ function studyroom_space_preprocess_entity_studyroom_space(&$variables) {
   }
 }
 
+function currentItemClass ($item) {
+  if ($item['rightnow'] != FAlSE) {
+    $todayKey = 'na';
+    foreach ($item['values'] as $key => $values) {
+      if (strpos($values['classes'], 'today') !== FALSE) {
+        $todayKey = $key;
+      }
+    }
+    $todayClasses = $item['values'][$todayKey]['classes'];
+    switch (TRUE) {
+      case strpos($todayClasses, 'empty'):
+        $returnedClass = 'today-free';
+        $returnedText = 'Free';
+        break;
+      case strpos($todayClasses, 'reserved'):
+        $returnedClass = 'today-busy';
+        $returnedText = 'Busy';
+        break;
+      case strpos($todayClasses, 'closed'):
+        $returnedClass = 'today-closed';
+        $returnedText = 'Closed';
+        break;
+      default:
+        $returnedClass = 'today-closed';
+        $returnedText = 'Closed';
+    }
+    $returnedArray = array($returnedText, $returnedClass);
+    return $returnedArray;
+  }
+  else return array('-', '-');
+}
+
 /**
  * Implements hook_entity_view().
  *
  * Returns an access denied page if page unpublished and
- * user does not have permission to view unpublised spaces.
+ * user does not have permission to view unpublished spaces.
  */
 function studyroom_space_entity_view($entity, $type, $view_mode, $langcode) {
   if ($type != 'studyroom_space' || $view_mode != 'full') {

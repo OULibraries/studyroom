@@ -14,6 +14,11 @@
  */
 ?>
 <div class="studyroom-space-calendar-single-day">
+    <div class="single-day-status <?php print $items['statusbarclass']; ?>">
+        <span class="single-day-status-text">
+         This room is currently <?php print $items['statusText']; ?>.
+        </span>
+    </div>
   <table class="single-day-table">
     <thead>
     <tr>
@@ -28,7 +33,20 @@
     </tr>
     </thead>
     <tbody>
-    <?php foreach ($items as $time): ; ?>
+    <?php
+    $firstElement = False;
+    foreach ($items as $time):
+    // We pass in the current time...but we don't want that displayed
+    if($firstElement) {
+        $firstElement = FALSE;
+        continue;
+    }
+    // @todo figure out why these show up and remove this condition
+    if ($time['hour'] == 't' || $time['hour'] == 'F' || $time['hour'] == 'B') {
+        continue;
+    }
+    else {
+    ?>
       <tr class="single-day-row">
         <td class="time">
           <span class="calendar-hour"><?php print $time['hour']; ?></span><span class="calendar-ampm"><?php print $time['ampm']; ?></span>
@@ -44,7 +62,7 @@
           <?php } ?>
         <?php endforeach; ?>
       </tr>
-    <?php endforeach; ?>
+    <?php } endforeach; ?>
     </tbody>
   </table>
 </div>
