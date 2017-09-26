@@ -34,7 +34,7 @@
     </thead>
     <tbody>
     <?php
-    $firstElement = False;
+    $firstElement = TRUE;
     foreach ($items as $time):
     // We pass in the current time...but we don't want that displayed
     if($firstElement) {

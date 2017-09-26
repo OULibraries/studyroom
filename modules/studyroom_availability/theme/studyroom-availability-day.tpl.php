@@ -16,7 +16,7 @@
  */
 ?>
 <div class="studyroom-space-calendar">
-<?php print $loc; ?>
+<?php print $loc; kpr('inthisfile');?>
 <?php print render($page['navigation']); ?>
 <table>
   <thead>
