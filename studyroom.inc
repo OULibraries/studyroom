@@ -177,7 +177,8 @@ class Studyroom {
    *   array of options formated for use in select form element
    */
   public function optionsMaxDuration($default = TRUE) {
-    $intervals = array(3600, 7200, 10800, 14400, 21600, 32400, 43200, 64800, 86400);
+    $intervals = array(3600, 7200, 10800, 14400, 21600, 28800, 32400, 43200,
+    64800, 86400);
     if ($default) {
       return array('' => '- Default -') + drupal_map_assoc($intervals, 'format_interval');
     }

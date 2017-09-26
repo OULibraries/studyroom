@@ -36,6 +36,37 @@ function template_preprocess_studyroom_availability_day(&$variables) {
 }
 
 /**
+ * Theme output of studyroom-availability-airport
+ * @param $variables
+ */
+function template_preprocess_studyroom_availability_airport(&$variables) {
+  $location = $variables['location'];
+  $variables['loc'] = '<p>' . t('Spaces/availability for %location', array('%location' => $location->label)) . '</p>';
+  $variables['spaces_header'] = $variables['availability']->spaces_header;
+
+  // Calculate forward and back dates for calendar.
+  $current = new DateTime("now");
+  $forward_date = clone $variables['date'];
+  $backward_date = clone $forward_date;
+  $forward_date->add(new DateInterval('P1D'));
+  $backward_date->sub(new DateInterval('P1D'));
+
+  // Create links.
+  $path = 'availability/' . $location->type . '/';
+
+  $backward_path = $path . $backward_date->format('Y-m-d');
+  $nav['links']['prev'] = l(t('Previous Day'), $backward_path);
+
+  $current_path = $path . $current->format('Y-m-d');
+  $nav['links']['current'] = l(t('Today'), $current_path);
+
+  $forward_path = $path . $forward_date->format('Y-m-d');
+  $nav['links']['next'] = l(t('Next Day'), $forward_path);
+
+  $variables['page']['navigation'] = theme('studyroom_availability_week_navigation', $nav);
+}
+
+/**
  * Theme output of studyroom_availability.
  */
 function template_preprocess_studyroom_availability_week(&$variables) {
