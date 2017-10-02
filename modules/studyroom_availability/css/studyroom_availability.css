@@ -220,16 +220,71 @@ background-color:#c0e4cd !important;
   background-color: #00AA88;
 }
 
+.air-status-free {
+  background-color: #c0e4cd;
+}
+
 .single-day-status.today-closed {
   background-color: blue;
+}
+
+.air-status-closed {
+  background-color: #afc1d0;
 }
 
 .single-day-status.today-busy {
   background-color: #f15d5d;
 }
 
+.air-status-busy {
+  background-color: #dab2b2;
+}
+
 span.single-day-status-text {
   margin-left: 15%;
   vertical-align: middle;
   font-family: sans-serif;
+}
+
+.airport-table {
+  height: 90vh;
+}
+
+.airport-page {
+  width: 100vw;
+  margin-left: -25%;
+}
+
+.studyroom-space-calendar table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0 auto;
+  padding: 0;
+  width: 100%;
+  clear: both;
+  background-color: transparent;
+  display: table;
+  border-color: grey;
+}
+
+.airport-half-left, .airport-half-right {
+  width: 50%;
+}
+
+.airport-half-left {
+  float: left;
+}
+
+.airport-half-right {
+  float: right;
+}
+
+.airport-table>tbody>tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.faculty-img {
+  vertical-align: middle;
+  margin-top: 20%;
+  padding-left: 5%;
 }

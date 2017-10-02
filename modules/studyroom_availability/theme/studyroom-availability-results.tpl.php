@@ -7,6 +7,6 @@
  * Available variables:
  */
 ?>
-<p class="studyroom-availability-date"><?php print $date_formatted ?></p>
+<!--<p class="studyroom-availability-date">--><?php //print $date_formatted ?><!--</p>-->
 <?php print render($location); ?>
 <?php print render($results); ?>
