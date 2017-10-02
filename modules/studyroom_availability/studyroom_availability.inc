@@ -221,9 +221,13 @@ class SpaceAvailability {
     $args = explode('/', drupal_get_path_alias());
     $day_var = (in_array('day', $args)) ? 'day' : '';
     if (is_array($this->user_types) && is_array($this->entity->reservation_types)) {
+      foreach ($this->entity->reservation_types as $key => $value) {
+        if (!$value) {
+          unset($this->entity->reservation_types[$key]);
+        }
+      }
       $types = array_intersect_key($this->user_types, $this->entity->reservation_types);
     }
-
     if (!empty($types)) {
       if (count($types) == 1) {
         $type = array_shift($types);

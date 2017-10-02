@@ -488,7 +488,7 @@ function studyroom_space_preprocess_entity_studyroom_space(&$variables) {
     $lastThirty = time() - (time() % 1800);
 
     // Check to see if 'day' is in the url...if so, pass to singleday tpl
-    if ($args[2] == 'day') {
+    if (isset($args[2]) && $args[2] == 'day') {
       foreach ($items as $key => $value) {
         $timestring = $value['hour'] . ' ' . $value['ampm'];
         $items[$key]['stamp'] = strtotime($timestring);
