@@ -249,6 +249,7 @@ function studyroom_availability_search_form_submit(&$form, &$form_state) {
 function studyroom_availability_spaces($location, $date) {
   $spaces = $location->getSpaces(TRUE);
   $args = explode('/', drupal_get_path_alias());
+  $lastThirty = time() - (time() % 1800);
 
   if (!$spaces) {
     return 'NONE FOUND';
@@ -266,10 +267,15 @@ function studyroom_availability_spaces($location, $date) {
   $items = $availability->checkAvailabilityByDate($spaces, $date, $is_today);
 
   if ($args[2] == 'airport') {
-
-
-
-
+    foreach ($items as $key => $value) {
+      $timestring = $value['hour'] . ' ' . $value['ampm'];
+      $items[$key]['stamp'] = strtotime($timestring);
+      if ($items[$key]['stamp'] != $lastThirty) {
+        unset($items[$key]);
+        continue;
+      }
+      $items[$key] = currentItemStatus($items[$key]);
+    }
 
     $results = theme('studyroom_availability_airport', array(
       'items' => $items,
@@ -302,6 +308,31 @@ function studyroom_availability_block_info() {
   return $blocks;
 }
 
+function currentItemStatus($item) {
+  foreach ($item['values'] as $key => $value) {
+    $classes = $value['classes'];
+    switch (TRUE) {
+      case strpos($classes, 'reserved'):
+        $value['entry'] = 'Busy';
+        $value['airstatus'] = 'air-status-busy';
+        break;
+      case strpos($classes, 'closed'):
+        $value['entry'] = 'Closed';
+        $value['airstatus'] = 'air-status-closed';
+        break;
+      case strpos($classes, 'empty'):
+        $value['entry'] = 'Free';
+        $value['airstatus'] = 'air-status-free';
+        break;
+      default:
+        $value['entry'] = 'Free';
+        $value['airstatus'] = 'air-status-free';
+    }
+    $item['values'][$key]['entry'] = $value['entry'];
+    $item['values'][$key]['airstatus'] = $value['airstatus'];
+  }
+  return $item;
+}
 
 /**
  * Implements hook_block_view().

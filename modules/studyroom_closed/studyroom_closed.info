@@ -17,9 +17,4 @@ files[] = views/studyroom_closed_handler_conflict_field.inc
 
 configure = admin/studyroom/reservation/closed
 
-; Information added by Drupal.org packaging script on 2016-01-06
-version = "7.x-1.3"
-core = "7.x"
-project = "studyroom"
-datestamp = "1452104940"
 
