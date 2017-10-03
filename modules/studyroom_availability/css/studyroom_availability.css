@@ -15,6 +15,15 @@
 }
 
 /**
+ *  Airport View
+ */
+
+.page-availability-bizzell-faculty-focus-room h1#page-title {
+ display:none; 
+}
+
+
+/**
  * Navigation
  */
 .studyroom-space-calendar .navigation,
