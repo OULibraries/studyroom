@@ -18,7 +18,11 @@
  *  Hide Title Airport View
  */
 
-.page-availability-bizzell-faculty-focus-room-airport h1#page-title, .page-availability-bizzell-graduate-student-focus-r-airport h1#page-title  {
+.page-availability-bizzell-faculty-focus-room h1#page-title,
+.page-availability-bizzell-group-study-airport-facultymap h1#page-title,
+.page-availability-bizzell-group-study-airport-graduatemap h1#page-title,
+.page-availability-bizzell-faculty-focus-room-airport h1#page-title,
+.page-availability-bizzell-graduate-student-focus-r-airport h1#page-title  {
  display:none; 
 }
 
@@ -261,7 +265,8 @@ span.single-day-status-text {
 
 .airport-page {
   width: 100vw;
-  margin-left: -25%;
+  margin-left: -11%;
+  margin-top: 5%;
   font-family:'Droid Sans';
   font-weight: 600;
 }
@@ -297,4 +302,10 @@ span.single-day-status-text {
   margin-top: 10%;
   padding-left: 3%;
   width: 85%;
+}
+
+.select-room-instruction {
+  font-size: 2.5em;
+  font-family: "Droid Sans";
+  padding-bottom: 10px;
 }
