@@ -77,7 +77,15 @@ $args = explode('/', drupal_get_path_alias());
 </div>
 </div>
 <div class="col-md-6 airport-half-right">
-    <img class="faculty-img" src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/LL2_faculty2.gif">
+    <?php if ($args[1] == 'bizzell_faculty_focus_room') { ?>
+    <img class="faculty-img" src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/LL2_faculty_airport.gif">
+    <?php }
+    else if ($args[1] == 'bizzell_graduate_student_focus_r') {?>
+    <img class="faculty-img" src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/LL2_graduate_airport.gif">
+    <?php }
+    else { ?>
+    <div>no map available</div>
+    <?php } ?>
 </div>
     <?php } ?>
 </div>
