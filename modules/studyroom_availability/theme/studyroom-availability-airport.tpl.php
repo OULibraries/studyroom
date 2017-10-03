@@ -18,8 +18,8 @@ $args = explode('/', drupal_get_path_alias());
 ?>
 <div class="airport-page">
     <?php
-    if ($args[3] == 'map'){ ?>
-        <img src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/LL2_faculty2.gif"
+    if ($args[3] == 'facultymap'){ ?>
+        <img src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/LL2_faculty_airport.gif"
              usemap="#facultymap2"/>
         <map name="facultymap2">
             <area shape="poly" coords="59,389,119,389,122,458,61,445" href="https://libraries.webtest.lib.ou.edu/space/1" target="_blank" alt="LL2531">
