@@ -276,16 +276,14 @@ span.single-day-status-text {
   border-color: grey;
 }
 
-.airport-half-left, .airport-half-right {
-  width: 50%;
-}
-
 .airport-half-left {
   float: left;
+  width: 40%;
 }
 
 .airport-half-right {
   float: right;
+  width: 60%;
 }
 
 .airport-table>tbody>tr:nth-child(odd) {
@@ -294,6 +292,7 @@ span.single-day-status-text {
 
 .faculty-img {
   vertical-align: middle;
-  margin-top: 20%;
-  padding-left: 5%;
+  margin-top: 10%;
+  padding-left: 3%;
+  width: 85%;
 }
