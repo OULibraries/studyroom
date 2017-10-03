@@ -15,6 +15,19 @@
 }
 
 /**
+ *  Hide Title Airport View
+ */
+
+.page-availability-bizzell-faculty-focus-room h1#page-title,
+.page-availability-bizzell-group-study-airport-facultymap h1#page-title,
+.page-availability-bizzell-group-study-airport-graduatemap h1#page-title,
+.page-availability-bizzell-faculty-focus-room-airport h1#page-title,
+.page-availability-bizzell-graduate-student-focus-r-airport h1#page-title  {
+ display:none; 
+}
+
+
+/**
  * Navigation
  */
 .studyroom-space-calendar .navigation,
@@ -86,7 +99,7 @@
   text-align: center;
   vertical-align: middle;
   margin: 0;
-  padding: 0;
+  padding: 1.33px 0px;
 }
 .studyroom-space-calendar td a, .studyroom-space-calendar-single-day td a {
   font-weight: bold;
@@ -149,7 +162,7 @@
 .studyroom-space-calendar td.reserved,
 .studyroom-space-calendar-single-day td.reserved {
   background-color: #dab2b2;
-  color: #7a7979;
+  /* color: #7a7979; */
 }
 .studyroom-space-calendar td.reserved a,
 .studyroom-space-calendar-single-day td.reserved a{
@@ -252,7 +265,10 @@ span.single-day-status-text {
 
 .airport-page {
   width: 100vw;
-  margin-left: -25%;
+  margin-left: -11%;
+  margin-top: 5%;
+  font-family:'Droid Sans';
+  font-weight: 600;
 }
 
 .studyroom-space-calendar table {
@@ -267,16 +283,14 @@ span.single-day-status-text {
   border-color: grey;
 }
 
-.airport-half-left, .airport-half-right {
-  width: 50%;
-}
-
 .airport-half-left {
   float: left;
+  width: 40%;
 }
 
 .airport-half-right {
   float: right;
+  width: 60%;
 }
 
 .airport-table>tbody>tr:nth-child(odd) {
@@ -285,6 +299,13 @@ span.single-day-status-text {
 
 .faculty-img {
   vertical-align: middle;
-  margin-top: 20%;
-  padding-left: 5%;
+  margin-top: 10%;
+  padding-left: 3%;
+  width: 85%;
+}
+
+.select-room-instruction {
+  font-size: 2.5em;
+  font-family: "Droid Sans";
+  padding-bottom: 10px;
 }
