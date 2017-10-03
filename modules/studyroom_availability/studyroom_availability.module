@@ -65,6 +65,15 @@ function studyroom_availability_theme() {
       ),
       'template' => 'studyroom-availability-day',
     ),
+    'studyroom_availability_airport' => $base + array(
+        'variables' => array(
+          'items' => array(),
+          'availability' => NULL,
+          'location' => NULL,
+          'date' => NULL,
+        ),
+        'template' => 'studyroom-availability-airport',
+      ),
     'studyroom_availability_week' => $base + array(
       'variables' => array(
         'items' => array(),
@@ -72,6 +81,14 @@ function studyroom_availability_theme() {
         'space' => NULL,
       ),
       'template' => 'studyroom-availability-week',
+    ),
+    'studyroom_availability_singleday' => $base + array(
+      'variables' => array(
+        'items' => array(),
+        'availability' => NULL,
+        'space' => NULL,
+      ),
+      'template' => 'studyroom-availability-singleday',
     ),
     'studyroom_availability_search' => $base + array(
       'template' => 'studyroom-availability-search',
@@ -92,11 +109,14 @@ function studyroom_availability_theme() {
  *
  * @param string $location
  *   The location for the search.
- * @param sting $date
+ * @param string $date
  *   The start date for the search.
  */
 function studyroom_availability_page($location = NULL, $date = NULL) {
   $spaces = studyroom_space_get_spaces();
+  $args = explode('/', drupal_get_path_alias());
+  $date = ($args[2] == 'airport') ? date('Y-m-d') : $date;
+
   if (empty($spaces)) {
     drupal_set_message(t('No spaces have been defined yet, so you cannot search for availability.'), 'error');
     drupal_goto();
@@ -228,6 +248,8 @@ function studyroom_availability_search_form_submit(&$form, &$form_state) {
  */
 function studyroom_availability_spaces($location, $date) {
   $spaces = $location->getSpaces(TRUE);
+  $args = explode('/', drupal_get_path_alias());
+  $lastThirty = time() - (time() % 1800);
 
   if (!$spaces) {
     return 'NONE FOUND';
@@ -244,13 +266,34 @@ function studyroom_availability_spaces($location, $date) {
   $availability = new SpaceAvailability();
   $items = $availability->checkAvailabilityByDate($spaces, $date, $is_today);
 
-  $results = theme('studyroom_availability_day', array(
-    'items' => $items,
-    'availability' => $availability,
-    'location' => $location,
-    'date' => $date,
-    'spaces' => $spaces,
-  ));
+  if ($args[2] == 'airport') {
+    foreach ($items as $key => $value) {
+      $timestring = $value['hour'] . ' ' . $value['ampm'];
+      $items[$key]['stamp'] = strtotime($timestring);
+      if ($items[$key]['stamp'] != $lastThirty) {
+        unset($items[$key]);
+        continue;
+      }
+      $items[$key] = currentItemStatus($items[$key]);
+    }
+
+    $results = theme('studyroom_availability_airport', array(
+      'items' => $items,
+      'availability' => $availability,
+      'location' => $location,
+      'date' => $date,
+      'spaces' => $spaces,
+    ));
+  }
+  else {
+    $results = theme('studyroom_availability_day', array(
+      'items' => $items,
+      'availability' => $availability,
+      'location' => $location,
+      'date' => $date,
+      'spaces' => $spaces,
+    ));
+  }
 
   return $results;
 }
@@ -265,6 +308,31 @@ function studyroom_availability_block_info() {
   return $blocks;
 }
 
+function currentItemStatus($item) {
+  foreach ($item['values'] as $key => $value) {
+    $classes = $value['classes'];
+    switch (TRUE) {
+      case strpos($classes, 'reserved'):
+        $value['entry'] = 'Busy';
+        $value['airstatus'] = 'air-status-busy';
+        break;
+      case strpos($classes, 'closed'):
+        $value['entry'] = 'Closed';
+        $value['airstatus'] = 'air-status-closed';
+        break;
+      case strpos($classes, 'empty'):
+        $value['entry'] = 'Free';
+        $value['airstatus'] = 'air-status-free';
+        break;
+      default:
+        $value['entry'] = 'Free';
+        $value['airstatus'] = 'air-status-free';
+    }
+    $item['values'][$key]['entry'] = $value['entry'];
+    $item['values'][$key]['airstatus'] = $value['airstatus'];
+  }
+  return $item;
+}
 
 /**
  * Implements hook_block_view().
@@ -282,4 +350,8 @@ function studyroom_availability_block_view($delta = '') {
 
   }
   return $block;
+}
+
+function get_current_status($results) {
+  return ($results);
 }

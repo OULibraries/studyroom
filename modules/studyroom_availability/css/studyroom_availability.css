@@ -6,30 +6,52 @@
   padding: 0px;
 }
 
-.studyroom-space-calendar {
+.studyroom-space-calendar, .studyroom-space-calendar-single-day {
   width: 100%;
 }
+
+.studyroom-space-calendar-single-day {
+  margin-left: -16%;
+}
+
+/**
+ *  Hide Title Airport View
+ */
+
+.page-availability-bizzell-faculty-focus-room h1#page-title,
+.page-availability-bizzell-group-study-airport-facultymap h1#page-title,
+.page-availability-bizzell-group-study-airport-graduatemap h1#page-title,
+.page-availability-bizzell-faculty-focus-room-airport h1#page-title,
+.page-availability-bizzell-graduate-student-focus-r-airport h1#page-title  {
+ display:none; 
+}
+
 
 /**
  * Navigation
  */
-.studyroom-space-calendar .navigation {
+.studyroom-space-calendar .navigation,
+.studyroom-space-calendar-single-day .navigation{
   margin: 25px 0;
   text-align: center;
 }
-.studyroom-space-calendar .navigation a {
+.studyroom-space-calendar .navigation a,
+.studyroom-space-calendar-single-day .navigation a {
   color: #ffffff;
 }
 
-.studyroom-space-calendar .navigation .prev-url {
+.studyroom-space-calendar .navigation .prev-url,
+.studyroom-space-calendar-single-day .navigation .prev-url {
   margin-left: 5px;
   float: left;
 }
-.studyroom-space-calendar .navigation .current-url {
+.studyroom-space-calendar .navigation .current-url,
+.studyroom-space-calendar-single-day .navigation .current-url {
   margin-left: auto;
   margin-right: auto;
 }
-.studyroom-space-calendar .navigation .next-url {
+.studyroom-space-calendar .navigation .next-url,
+.studyroom-space-calendar-single-day .navigation .next-url {
   float: right;
   margin-right: 5px;
 }
@@ -46,12 +68,20 @@
   width: 100%;
   clear: both;
 }
-.studyroom-space-calendar tr {
+.studyroom-space-calendar-single-day table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0 auto 0 -11%;
+  padding: 0;
+  width: 100vw;
+  clear: both;
+}
+.studyroom-space-calendar tr, .studyroom-space-calendar-single-day tr {
   padding: 0;
   margin: 0;
   background-color: #ffffff;
 }
-.studyroom-space-calendar th {
+.studyroom-space-calendar th, .studyroom-space-calendar-single-day th {
   color: #fff;
   border: 1px solid #ffffff;
   background-color: #7a7979;
@@ -60,7 +90,7 @@
   padding:10px 0px;
 }
 
-.studyroom-space-calendar td {
+.studyroom-space-calendar td, .studyroom-space-calendar-single-day td {
   width: 12%;
   max-width:100px;
   min-width: 12%;
@@ -69,18 +99,20 @@
   text-align: center;
   vertical-align: middle;
   margin: 0;
-  padding: 0;
+  padding: 1.33px 0px;
 }
-.studyroom-space-calendar td a {
+.studyroom-space-calendar td a, .studyroom-space-calendar-single-day td a {
   font-weight: bold;
   text-decoration: none;
 }
-.studyroom-space-calendar td a:hover {
+.studyroom-space-calendar td a:hover,
+.studyroom-space-calendar-single-day td a:hover {
   text-decoration: underline;
 }
 
 /* Time column */
-.studyroom-space-calendar td.time {
+.studyroom-space-calendar td.time,
+.studyroom-space-calendar-single-day td.time {
   font-family: 'Droid Sans';
   text-align: right;
   border: none;
@@ -90,11 +122,13 @@
   width: 1%;
   min-width: 1%;
 }
-.studyroom-space-calendar td.time .calendar-hour {
+.studyroom-space-calendar td.time .calendar-hour,
+.studyroom-space-calendar-single-day td.time .calendar-hour {
   font-size: 1.1em;
   font-weight: bold;
 }
-.studyroom-space-calendar td.time .calendar-ampm {
+.studyroom-space-calendar td.time .calendar-ampm,
+.studyroom-space-calendar-single-day td.time .calendar-ampm {
   font-size: 1em;
   padding-left: 2px;
   font-weight: bold;
@@ -102,7 +136,9 @@
 
 /* Day column */
 .studyroom-space-calendar th.day,
-.studyroom-space-calendar th.space {
+.studyroom-space-calendar th.space,
+.studyroom-space-calendar-single-day th.day,
+.studyroom-space-calendar-single-day th.space {
   color: #fff;
   background-color: #7a7979;
   border: solid 1px #ffffff;
@@ -112,36 +148,42 @@
   font-weight: bold;
 }
 
-.studyroom-space-calendar th.day .weekday {
+.studyroom-space-calendar th.day .weekday,
+.studyroom-space-calendar-single-day th.day .weekday{
   padding-right: 3px;
 }
-.studyroom-space-calendar td.day {
+.studyroom-space-calendar td.day, .studyroom-space-calendar-single-day td.day {
   margin: 0;
 /*  width: 1.5em; */
   text-align: center;
   padding: 0.125em 0.25em 0 0.25em;
 }
 
-.studyroom-space-calendar td.reserved {
+.studyroom-space-calendar td.reserved,
+.studyroom-space-calendar-single-day td.reserved {
   background-color: #dab2b2;
+  /* color: #7a7979; */
+}
+.studyroom-space-calendar td.reserved a,
+.studyroom-space-calendar-single-day td.reserved a{
   color: #7a7979;
 }
-.studyroom-space-calendar td.reserved a{
-  color: #7a7979;
-}
-.studyroom-space-calendar td.closed {
+.studyroom-space-calendar td.closed,
+.studyroom-space-calendar-single-day td.closed {
   background-color: #afc1d0;
   color: #afc1d0;
 }
-.studyroom-space-calendar th.today {
+.studyroom-space-calendar th.today, .studyroom-space-calendar-single-day th.today {
   background-color: #3d3d3d;
   border-color: #ffffff;
 }
-.studyroom-space-calendar td.today {
+.studyroom-space-calendar td.today,
+.studyroom-space-calendar-single-day td.today{
   color: #000;
 /*  background-color: #fff; */
 }
-.studyroom-space-calendar td.today.closed {
+.studyroom-space-calendar td.today.closed,
+.studyroom-space-calendar-single-day td.today.closed{
   background-color: #afc1d0;
   color: #afc1d0;
 }
@@ -159,4 +201,110 @@ color:#7a7979;
 
 td.notempty {
 background-color:#c0e4cd !important;
+}
+
+/* Single Day */
+
+.single-day-table {
+  width: 100vw;
+  margin-left: -27%;
+}
+
+.single-day-row {
+  height: 40px;
+  font-size: 1.4em;
+}
+
+/*.page-space-day .title {*/
+  /*background-color: red;*/
+/*}*/
+
+.single-day-status {
+  height: 50px;
+  width: 100vw;
+  margin-left: -11%;
+  font-size: 1.8em;
+  color: white;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.single-day-status.today-free {
+  background-color: #00AA88;
+}
+
+.air-status-free {
+  background-color: #c0e4cd;
+}
+
+.single-day-status.today-closed {
+  background-color: blue;
+}
+
+.air-status-closed {
+  background-color: #afc1d0;
+}
+
+.single-day-status.today-busy {
+  background-color: #f15d5d;
+}
+
+.air-status-busy {
+  background-color: #dab2b2;
+}
+
+span.single-day-status-text {
+  margin-left: 15%;
+  vertical-align: middle;
+  font-family: sans-serif;
+}
+
+.airport-table {
+  height: 90vh;
+}
+
+.airport-page {
+  width: 100vw;
+  margin-left: -25%;
+  font-family:'Droid Sans';
+  font-weight: 600;
+}
+
+.studyroom-space-calendar table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0 auto;
+  padding: 0;
+  width: 100%;
+  clear: both;
+  background-color: transparent;
+  display: table;
+  border-color: grey;
+}
+
+.airport-half-left {
+  float: left;
+  width: 40%;
+}
+
+.airport-half-right {
+  float: right;
+  width: 60%;
+}
+
+.airport-table>tbody>tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.faculty-img {
+  vertical-align: middle;
+  margin-top: 10%;
+  padding-left: 3%;
+  width: 85%;
+}
+
+.select-room-instruction {
+  font-size: 2.5em;
+  font-family: "Droid Sans";
+  padding-bottom: 10px;
 }
