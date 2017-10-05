@@ -265,8 +265,7 @@ function studyroom_availability_spaces($location, $date) {
 
   $availability = new SpaceAvailability();
   $items = $availability->checkAvailabilityByDate($spaces, $date, $is_today);
-
-  if ($args[2] == 'airport') {
+  if ($args[2] == 'airport' || (strpos_arr($args, 'image'))) {
     foreach ($items as $key => $value) {
       $timestring = $value['hour'] . ' ' . $value['ampm'];
       $items[$key]['stamp'] = strtotime($timestring);
