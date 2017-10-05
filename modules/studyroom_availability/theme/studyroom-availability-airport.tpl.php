@@ -18,7 +18,8 @@ $args = explode('/', drupal_get_path_alias());
 ?>
 <div class="airport-page">
     <?php
-    if ($args[3] == 'facultymap'){ ?>
+    if (in_array('facultyimagemap', $args)){ ?>
+      <div class="just-the-maps">
       <div class="select-room-instruction">
           Select a room to make a reservation.
       </div>
@@ -31,8 +32,10 @@ $args = explode('/', drupal_get_path_alias());
             <area shape="poly" coords="259,389,319,388,319,481,260,476,259,478" href="https://libraries.webtest.lib.ou.edu/space/4" target="new" alt="LL2537">
             <area shape="poly" coords="321,387,384,389,384,482,322,481" href="https://libraries.webtest.lib.ou.edu/space/5" target="new" alt="LL2539">
         </map>
+      </div>
      <?php }
-     else if ($args[3] == 'graduatemap'){?>
+     else if (in_array('graduateimagemap', $args)){?>
+       <div class="just-the-maps">
        <div class="select-room-instruction">
        Select a room to make a reservation.
       </div>
@@ -45,6 +48,7 @@ $args = explode('/', drupal_get_path_alias());
             <area shape="poly" coords="259,389,319,388,319,481,260,476,259,478" href="https://libraries.webtest.lib.ou.edu/space/4" target="new" alt="LL2537">
             <area shape="poly" coords="321,387,384,389,384,482,322,481" href="https://libraries.webtest.lib.ou.edu/space/5" target="new" alt="LL2539">
         </map>
+       </div>
      <?php }
     else { ?>
 <div class="col-md-6 airport-half-left">
