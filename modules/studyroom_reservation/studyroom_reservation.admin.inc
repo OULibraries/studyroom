@@ -455,6 +455,8 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
     $form_state['redirect'] = 'availability/' . implode('/', $url);
   }
   else if(in_array('day', $args)) {
+    module_load_include('pages.inc', 'user');
+    user_logout_current_user();
     $url = array($entity->space_id, 'day');
     $form_state['redirect'] = STUDYROOM_SPACE_PATH . implode('/', $url);
   }
