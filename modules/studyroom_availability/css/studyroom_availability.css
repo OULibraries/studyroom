@@ -20,6 +20,7 @@
 
 .page-availability-bizzell-faculty-focus-room h1#page-title,
 .page-availability-bizzell-group-study-airport-facultymap h1#page-title,
+.page-availability-bizzell-group-study-airport-facultyimagemap h1#page-title,
 .page-availability-bizzell-group-study-airport-graduatemap h1#page-title,
 .page-availability-bizzell-faculty-focus-room-airport h1#page-title,
 .page-availability-bizzell-graduate-student-focus-r-airport h1#page-title  {
@@ -307,4 +308,8 @@ span.single-day-status-text {
   font-size: 2.5em;
   font-family: "Droid Sans";
   padding-bottom: 10px;
+}
+
+.just-the-maps {
+  text-align: center;
 }
