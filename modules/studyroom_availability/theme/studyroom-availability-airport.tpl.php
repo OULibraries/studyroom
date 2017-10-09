@@ -20,10 +20,10 @@ $args = explode('/', drupal_get_path_alias());
     <?php
     if (in_array('facultyimagemap', $args)){ ?>
       <div class="just-the-maps">
-      <div class="select-room-instruction">
-          Select a room to make a reservation.
-      </div>
-        <img src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/LL2_faculty_airport.gif"
+<!--      <div class="select-room-instruction">-->
+<!--          Select a room to make a reservation.-->
+<!--      </div>-->
+        <img src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/facultyimagemap.png"
              usemap="#facultymap2"/>
         <map name="facultymap2">
             <area shape="poly" coords="59,389,119,389,122,458,61,445" href="https://libraries.webtest.lib.ou.edu/space/1" target="_blank" alt="LL2531">
@@ -82,10 +82,10 @@ $args = explode('/', drupal_get_path_alias());
 </div>
 <div class="col-md-6 airport-half-right">
     <?php if ($args[1] == 'bizzell_faculty_focus_room') { ?>
-    <img class="faculty-img" src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/LL2_faculty_airport.gif">
+    <img class="faculty-img" src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/facultymap.png">
     <?php }
     else if ($args[1] == 'bizzell_graduate_student_focus_r') {?>
-    <img class="faculty-img" src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/LL2_graduate_airport.gif">
+    <img class="faculty-img" src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/graduatemap.png">
     <?php }
     else { ?>
     <div>no map available</div>
