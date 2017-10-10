@@ -457,8 +457,7 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
   else if(in_array('day', $args)) {
     $url = array($entity->space_id, 'day');
     $form_state['redirect'] = STUDYROOM_SPACE_PATH . implode('/', $url);
-    $_GET['destination'] = '/space/1';
-    cas_logout();
+    if ($location == 'bizzell_consultation_room') cas_logout();
   }
   else {
     $url = array($entity->space_id, $date->format('Y'), date_week($date));
