@@ -425,7 +425,6 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
  */
 function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
   $entity = entity_ui_controller('studyroom_reservation')->entityFormSubmitBuildEntity($form, $form_state);
-
   // Add in created and changed times.
   if ($entity->is_new = isset($entity->is_new) ? $entity->is_new : 0) {
     $entity->created = time();
@@ -447,14 +446,42 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
   // Get year/week to redirect to correct week of reservation.
   $date = new DateObject($entity->start_time);
   $args = explode('/', drupal_get_path_alias());
-  if(in_array('day', $args)) {
+  $location = $form_state['studyroom']->space->type;
+  // if this comes from the interactive map page and has the word 'image' in
+  // the url we want to redirect back to the interactive map page
+  // @todo better handling of the location of the word image
+  if (strpos_arr($args, 'image')){
+    $url = array($location, 'airport', $args[6]);
+    $form_state['redirect'] = 'availability/' . implode('/', $url);
+  }
+  else if(in_array('day', $args)) {
     $url = array($entity->space_id, 'day');
+    $form_state['redirect'] = STUDYROOM_SPACE_PATH . implode('/', $url);
+    if ($location == 'bizzell_consultation_room') {
+      cas_logout();
+    }
   }
   else {
     $url = array($entity->space_id, $date->format('Y'), date_week($date));
+    $form_state['redirect'] = STUDYROOM_SPACE_PATH . implode('/', $url);
   }
 
-  $form_state['redirect'] = STUDYROOM_SPACE_PATH . implode('/', $url);
+}
+
+/**
+ * @param $haystack
+ * @param $needle
+ * @return bool|int
+ *
+ * check if the array $needle is anywhere in the array $haystack
+ */
+function strpos_arr($haystack, $needle) {
+  if(!is_array($needle)) $needle = array($needle);
+  $haystack = implode(',', $haystack);
+  foreach($needle as $what) {
+    if(($pos = strpos($haystack, $what))!==false) return $pos;
+  }
+  return false;
 }
 
 /**
