@@ -126,7 +126,7 @@ $args = explode('/', drupal_get_path_alias());
        </div>
      <?php }
     else { ?>
-<div class="col-md-6 airport-half-left">
+<div class="col-md-2 airport-half-left">
 <div class="studyroom-space-calendar">
     <table class="table-striped airport-table">
         <thead>
@@ -155,12 +155,12 @@ $args = explode('/', drupal_get_path_alias());
     </table>
 </div>
 </div>
-<div class="col-md-6 airport-half-right">
+<div class="col-md-10 airport-half-right">
     <?php if ($args[1] == 'bizzell_faculty_focus_room') { ?>
     <img class="faculty-img" src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/facultymap.png">
     <?php }
     else if ($args[1] == 'bizzell_graduate_student_focus_r') {?>
-    <img class="faculty-img" src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/graduatemap.png">
+    <img class="graduate-img" src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/graduatemap.png">
     <?php }
     else { ?>
     <div>no map available</div>
