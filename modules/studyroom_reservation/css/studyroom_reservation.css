@@ -15,3 +15,15 @@
 .studyroom-reservation-type-list li:last-child {
   border: 0 none;
 }
+
+.form-item-user-name {
+  display:none;
+  )
+ 
+ #studyroom-reservation-edit-form #edit-space-id-display label {
+   display:none;
+  }
+ 
+  #studyroom-reservation-edit-form #edit-space-id-display {
+    font-size: 2em;
+  }
