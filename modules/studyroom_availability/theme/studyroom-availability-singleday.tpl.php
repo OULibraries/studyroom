@@ -16,7 +16,7 @@
 <div class="studyroom-space-calendar-single-day">
     <div class="single-day-status <?php print $items['statusbarclass']; ?>">
         <span class="single-day-status-text">
-         This room is currently <?php print $items['statusText']; ?>.
+         This room is currently <?php print strotolower($items['statusText']); ?>.
         </span>
     </div>
   <table class="single-day-table">
