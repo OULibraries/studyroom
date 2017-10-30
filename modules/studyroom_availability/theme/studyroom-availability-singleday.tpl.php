@@ -12,12 +12,14 @@
  *
  * @ingroup themeable
  */
+
+$args = explode('/', drupal_get_path_alias());
 ?>
 <div class="studyroom-space-calendar-single-day">
     <div class="single-day-status <?php print $items['statusbarclass']; ?>">
-        <span class="single-day-status-text">
+        <p class="single-day-status-text">
          This room is currently <?php print strtolower($items['statusText']); ?>.
-        </span>
+        </p>
     </div>
   <table class="single-day-table">
     <thead>
@@ -52,11 +54,18 @@
           <span class="calendar-hour"><?php print $time['hour']; ?></span><span class="calendar-ampm"><?php print $time['ampm']; ?></span>
         </td>
         <?php $curpos = 0; ?>
-        <?php foreach ($week_days as $id => $column): ;?>
+        <?php foreach ($week_days as $id => $column): ; ?>
           <?php if ($column['today']) { ?>
             <td class="<?php print $time['values'][$id]['classes']; ?>">
               <div class="calendar-item">
-                <?php print $time['values'][$id]['entry'] ?>
+                <?php
+                if ((strpos($args[3], 'image')) &&
+                  (strpos($time['values'][$id]['entry'], 'Busy'))) {
+                    print 'Busy';
+                  }
+                  else{
+                    print $time['values'][$id]['entry'];;
+                  } ?>
               </div>
             </td>
           <?php } ?>
