@@ -320,3 +320,22 @@ span.single-day-status-text {
 .just-the-maps {
   text-align: center;
 }
+
+.airport-current-time {
+  margin-left: 13%;
+  font-family: "Droid Sans";
+}
+
+.airport-map-return {
+  float: left;
+  margin-left: 2%;
+  padding-top: 6px;
+}
+
+p.single-day-status-text {
+  margin-top: 0;
+  padding-top: 6px;
+  vertical-align: middle;
+  font-family: sans-serif;
+  margin-left: 13%;
+}
