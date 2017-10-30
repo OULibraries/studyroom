@@ -17,6 +17,9 @@
 $args = explode('/', drupal_get_path_alias());
 ?>
 <div class="airport-page">
+    <H3 class="airport-current-time">
+      <?php echo date("M, d  h:ia"); ?>
+    </H3>
     <?php
     if (in_array('facultyimagemap', $args)){ ?>
       <div class="just-the-maps">
