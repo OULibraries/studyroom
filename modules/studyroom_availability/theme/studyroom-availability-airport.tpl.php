@@ -165,7 +165,7 @@ $args = explode('/', drupal_get_path_alias());
     else if ($args[1] == 'bizzell_graduate_student_focus_r') {?>
     <img class="graduate-img" src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/graduatemap.png">
     <?php }
-    else if ($args[1] == 'bizzell_group_study') { ?>
+    else if ($args[1] == 'bizzell_ll1_group_study') { ?>
         <img class="group-study-img" src="/sites/all/modules/studyroom/modules/studyroom_availability/theme/img/LL1plain3.png">
     <?php }
     else { ?>
