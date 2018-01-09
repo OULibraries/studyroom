@@ -23,7 +23,9 @@
 .page-availability-bizzell-group-study-airport-facultyimagemap h1#page-title,
 .page-availability-bizzell-group-study-airport-graduatemap h1#page-title,
 .page-availability-bizzell-faculty-focus-room-airport h1#page-title,
-.page-availability-bizzell-graduate-student-focus-r-airport h1#page-title  {
+.page-availability-bizzell-graduate-student-focus-r-airport h1#page-title,
+.page-availability-bizzell-ll1-group-study-airport h1#page-title
+{
  display:none; 
 }
 .page-space-day #page-title { display:none;}
@@ -305,6 +307,12 @@ span.single-day-status-text {
   width: 64%;
 }
 .graduate-img {
+  vertical-align: middle;
+  /*margin-top: 10%;*/
+  padding-left: 15%;
+  width: 64%;
+}
+.group-study-img {
   vertical-align: middle;
   /*margin-top: 10%;*/
   padding-left: 15%;

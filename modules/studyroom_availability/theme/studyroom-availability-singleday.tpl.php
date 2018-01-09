@@ -59,7 +59,7 @@ $args = explode('/', drupal_get_path_alias());
             <td class="<?php print $time['values'][$id]['classes']; ?>">
               <div class="calendar-item">
                 <?php
-                if ((strpos($args[3], 'image')) &&
+                if (($args[3]) && (strpos($args[3], 'image')) &&
                   (strpos($time['values'][$id]['entry'], 'Busy'))) {
                     print 'Busy';
                   }
