@@ -1,5 +1,5 @@
-
--- SUMMARY --
+SUMMARY
+----
 
 Studyroom is a family of modules to create an online system by which
 users can reserve administrator-defined assets of an organization for
@@ -13,7 +13,8 @@ Its primary audience is universities and libraries.
 The module make use of Drupal 7 entities, using the Entity API module
 to do most of the heavy lifting.
 
--- REQUIREMENTS -
+REQUIREMENTS
+----
 
 Drupal version 7.14 or greater.
 
@@ -22,24 +23,25 @@ https://drupal.org/node/2123923
 This patch allows the bundle fields to show up under the "manage display" tab
 on the locations and reservations types.
 
-
--- PHP REQUIREMENTS --
+PHP REQUIREMENTS
+----
 
 The use of the DateInterval class means that we require PHP version >5.3.
 
--- INSTALLATION --
+INSTALLATION
+----
 
-- Activate all the Studyroom modules and their dependencies.
-- Visit admin/studyroom/locations create a location type (e.g. Estrella Hall).
-- Visit admin/studyroom/spaces and create spaces (e.g. Room 1, Lounge 3).
+* Activate all the Studyroom modules and their dependencies.
+* Visit admin/studyroom/locations create a location type (e.g. Estrella Hall).
+* Visit admin/studyroom/spaces and create spaces (e.g. Room 1, Lounge 3).
 
--- CONTACT --
-
+CONTACT
+----
 Current maintainers:
 * Scott Worthington - http://drupal.org/user/325316
 
--- SPONSORS --
-
+SPONSORS
+----
 This project has been sponsored by:
 Estrella Mountain Community College
 http://estrellamountain.edu/
