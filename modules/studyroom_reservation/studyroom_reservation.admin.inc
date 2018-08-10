@@ -32,33 +32,33 @@ class StudyroomReservationUIController extends EntityDefaultUIController {
     );
 
     $items[$this->path . 'add'] = array(
-      'title callback' => 'entity_ui_get_action_title',
-      'title arguments' => array('add', $this->entityType),
-      'page callback'  => 'studyroom_reservation_add_page',
-      'page arguments' => array($this->entityType),
-      'access callback'  => 'studyroom_reservation_access',
-      'access arguments' => array('create-reservation'),
-      'type' => MENU_LOCAL_ACTION,
-    ) + $defaults;
+        'title callback' => 'entity_ui_get_action_title',
+        'title arguments' => array('add', $this->entityType),
+        'page callback'  => 'studyroom_reservation_add_page',
+        'page arguments' => array($this->entityType),
+        'access callback'  => 'studyroom_reservation_access',
+        'access arguments' => array('create-reservation'),
+        'type' => MENU_LOCAL_ACTION,
+      ) + $defaults;
 
     foreach (studyroom_reservation_types() as $type) {
       $items[$this->path . 'add/' . $type->type] = array(
-        'title' => 'Add ' . drupal_strtolower($type->label) . ' reservation',
-        'page callback' => 'studyroom_reservation_form_wrapper',
-        'page arguments' => array(studyroom_reservation_create(array('type' => $type->type))),
-        'access callback' => 'studyroom_reservation_access',
-        'access arguments' => array('create', $type),
-        'description' => $type->description,
-      ) + $defaults;
+          'title' => 'Add ' . drupal_strtolower($type->label) . ' reservation',
+          'page callback' => 'studyroom_reservation_form_wrapper',
+          'page arguments' => array(studyroom_reservation_create(array('type' => $type->type))),
+          'access callback' => 'studyroom_reservation_access',
+          'access arguments' => array('create', $type),
+          'description' => $type->description,
+        ) + $defaults;
       $items[$this->path . 'add/' . $type->type . '/%/%'] = array(
-        'title' => 'Add ' . drupal_strtolower($type->label) . ' reservation',
-        'page callback' => 'studyroom_reservation_form_wrapper',
-        'page arguments' => array(studyroom_reservation_create(array(
-          'type' => $type->type)), 3, 4),
-        'access callback' => 'studyroom_reservation_access',
-        'access arguments' => array('create', $type),
-        'description' => $type->description,
-      ) + $defaults;
+          'title' => 'Add ' . drupal_strtolower($type->label) . ' reservation',
+          'page callback' => 'studyroom_reservation_form_wrapper',
+          'page arguments' => array(studyroom_reservation_create(array(
+            'type' => $type->type)), 3, 4),
+          'access callback' => 'studyroom_reservation_access',
+          'access arguments' => array('create', $type),
+          'description' => $type->description,
+        ) + $defaults;
     }
 
     $items[$this->path . $wildcard] = array(
@@ -77,25 +77,25 @@ class StudyroomReservationUIController extends EntityDefaultUIController {
       'weight' => -10,
     );
     $items[$this->path . $wildcard . '/edit'] = array(
-      'title' => 'Edit',
-      'page callback' => 'studyroom_reservation_form_wrapper',
-      'page arguments' => array($id_count),
-      'access callback' => 'studyroom_reservation_access',
-      'access arguments' => array('edit', $id_count),
-      'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-      'weight' => 0,
-    ) + $defaults;
+        'title' => 'Edit',
+        'page callback' => 'studyroom_reservation_form_wrapper',
+        'page arguments' => array($id_count),
+        'access callback' => 'studyroom_reservation_access',
+        'access arguments' => array('edit', $id_count),
+        'type' => MENU_LOCAL_TASK,
+        'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+        'weight' => 0,
+      ) + $defaults;
     $items[$this->path . $wildcard . '/delete'] = array(
-      'title' => 'Delete',
-      'page callback' => 'studyroom_reservation_delete_form_wrapper',
-      'page arguments' => array($id_count),
-      'access callback' => 'studyroom_reservation_access',
-      'access arguments' => array('delete', $id_count),
-      'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_INLINE,
-      'weight' => 10,
-    ) + $defaults;
+        'title' => 'Delete',
+        'page callback' => 'studyroom_reservation_delete_form_wrapper',
+        'page arguments' => array($id_count),
+        'access callback' => 'studyroom_reservation_access',
+        'access arguments' => array('delete', $id_count),
+        'type' => MENU_LOCAL_TASK,
+        'context' => MENU_CONTEXT_INLINE,
+        'weight' => 10,
+      ) + $defaults;
 
     return $items;
   }
@@ -393,7 +393,9 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
       '%time' => $space_day_hours['start_time']->format('h:i a'))));
     return;
   }
-  if ($entity->end_time > $space_day_hours['end_time']) {
+
+  $space_day_hours['end_time']->modify('+1 minute');
+  if ($entity->end_time > $space_day_hours['end_time'] && ($space_day_hours['end_time']->format('h:i a') != '12:00 am')) {
     form_set_error('', t('Your reservation cannot end after %time on this day.', array(
       '%time' => $space_day_hours['end_time']->format('h:i a'))));
     return;
@@ -537,3 +539,4 @@ function studyroom_reservation_delete_form_submit($form, &$form_state) {
 
   $form_state['redirect'] = $form_state['studyroom_redirect_path'];
 }
+
