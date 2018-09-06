@@ -4,6 +4,7 @@
  */
 
 (function($) {
+  console.log('test test');
 Drupal.behaviors.studyrooms = {
   attach: function (context) {
     for (var id in Drupal.settings.datePopup) {
