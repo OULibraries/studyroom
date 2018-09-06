@@ -409,13 +409,13 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
     $rule_max_per = $entity->checkRuleMaxResvPer($form_state['values']['user_name']);
     $location = studyroom_space_location_load($studyroom->space->type);
     // check for daily limit
-    if (isset($location->max_times_per_day) && $location->max_times_per_day > 0) {
-      // If more than rule, deny creation.
-      if ($rule_max_per['daily'] >= $location->max_times_per_day) {
-          form_set_error('', t('You have reached the daily reservation limit of %count.
-            Please try again tomorrow.', array('%count' => $location->max_times_per_day)));
-      }
-    }
+//    if (isset($location->max_times_per_day) && $location->max_times_per_day > 0) {
+//      // If more than rule, deny creation.
+//      if ($rule_max_per['daily'] >= $location->max_times_per_day) {
+//          form_set_error('', t('You have reached the daily reservation limit of %count.
+//            Please try again tomorrow.', array('%count' => $location->max_times_per_day)));
+//      }
+//    }
     //check for weekly limit
     if (isset($location->max_times_per_week) && $location->max_times_per_week > 0) {
       // If more than rule, deny creation.

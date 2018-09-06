@@ -128,8 +128,6 @@ class StudyroomReservation extends Entity {
     $weeklyCount = count($resvs);
 
     $countArray = array('daily' => $dailyCount,'weekly' => $weeklyCount);
-    dpm($countArray);
-    kpr($countArray);
     return $countArray;
   }
 }
