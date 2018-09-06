@@ -79,6 +79,28 @@ class StudyroomReservation extends Entity {
     $spaces = studyroom_space_get_spaces_by_type($space->type);
     $space_ids = array_keys($spaces);
 
+    // Get midnight today
+    $rule_day_start = strtotime('today midnight');
+
+    // Get midnight tomorrow
+    $rule_day_end = strtotime('tomorrow midnight');
+
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'studyroom_reservation')
+      ->propertyCondition('type', $this->type)
+      ->propertyCondition('space_id', $space_ids, 'IN')
+      ->propertyCondition('uid', $uid)
+      ->fieldCondition('field_reservation_datetime', 'value', array($rule_day_start, $rule_day_end), 'BETWEEN')
+      ->fieldOrderBy('field_reservation_datetime', 'value', 'ASC');
+    $results = $query->execute();
+
+    $resvs = array();
+    if (isset($results['studyroom_reservation'])) {
+      $resvs = array_keys($results['studyroom_reservation']);
+    }
+
+    $dailyCount = count($resvs);
+
     // Get midnight of first day of week.
     $weekday = $this->start_time_object->format('w');
     $week_start = $this->start_time_object->sub(new DateInterval('P' . $weekday . 'D'));
@@ -103,7 +125,12 @@ class StudyroomReservation extends Entity {
       $resvs = array_keys($results['studyroom_reservation']);
     }
 
-    return count($resvs);
+    $weeklyCount = count($resvs);
+
+    $countArray = array('daily' => $dailyCount,'weekly' => $weeklyCount);
+    dpm($countArray);
+    kpr($countArray);
+    return $countArray;
   }
 }
 
