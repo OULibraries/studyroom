@@ -78,16 +78,20 @@ class StudyroomReservation extends Entity {
     $space = studyroom_space_load($this->space_id);
     $spaces = studyroom_space_get_spaces_by_type($space->type);
     $space_ids = array_keys($spaces);
-
     // Get midnight of first day of week.
+    $selected_day_start = new DateTime($this->start_time_object->originalTime);
     $weekday = $this->start_time_object->format('w');
     $week_start = $this->start_time_object->sub(new DateInterval('P' . $weekday . 'D'));
     $week_start->setTime(0, 0, 0);
+    $selected_day_start->setTime(0, 0, 0);
     $rule_week_start = $week_start->format('Y-m-d H:i:s');
+    $rule_day_start = $selected_day_start->format('Y-m-d H:i:s');
 
     // Get weeks end.
     $week_end = $week_start->add(new DateInterval('P7D'));
     $rule_week_end = $week_end->format('Y-m-d H:i:s');
+    $day_end = $selected_day_start->add(new DateInterval('P1D'));
+    $rule_day_end = $day_end->format('Y-m-d H:i:s');
 
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'studyroom_reservation')
@@ -105,30 +109,23 @@ class StudyroomReservation extends Entity {
 
     $weeklyCount = count($resvs);
 
-    // Get midnight today
-    $rule_day_start = strtotime('today midnight');
-
-    // Get midnight tomorrow
-    $rule_day_end = strtotime('tomorrow midnight');
-
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', 'studyroom_reservation')
+    $query_daily = new EntityFieldQuery();
+    $query_daily->entityCondition('entity_type', 'studyroom_reservation')
       ->propertyCondition('type', $this->type)
       ->propertyCondition('space_id', $space_ids, 'IN')
       ->propertyCondition('uid', $uid)
       ->fieldCondition('field_reservation_datetime', 'value', array($rule_day_start, $rule_day_end), 'BETWEEN')
       ->fieldOrderBy('field_reservation_datetime', 'value', 'ASC');
-    $results = $query->execute();
+    $results_daily = $query_daily->execute();
 
-    $resvs = array();
-    if (isset($results['studyroom_reservation'])) {
-      $resvs = array_keys($results['studyroom_reservation']);
+    $resvs_daily = array();
+    if (isset($results_daily['studyroom_reservation'])) {
+      $resvs_daily = array_keys($results_daily['studyroom_reservation']);
     }
 
-    $dailyCount = count($resvs);
+    $dailyCount = count($resvs_daily);
 
-    //$countArray = array('daily' => $dailyCount,'weekly' => $weeklyCount);
-    $countArray = array('daily' => 2,'weekly' => 10);
+    $countArray = array('daily' => $dailyCount,'weekly' => $weeklyCount);
     return $countArray;
   }
 }
