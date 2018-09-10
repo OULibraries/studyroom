@@ -340,23 +340,23 @@ function studyroom_reservation_type_form($form, &$form_state, $type, $op = 'edit
     '#access' => $type->public,
   );
 
-//  $form['daily_limit'] = array(
-//    '#type' => 'textfield',
-//    '#default_value' => 1,
-//    '#description' => t('The daily reservation limit for this user type.'),
-//    '#required' => TRUE,
-//    '#size' => 5,
-//    '#maxlength' => 2
-//  );
-//
-//  $form['weekly_limit'] = array(
-//    '#type' => 'textfield',
-//    '#default_value' => 5,
-//    '#description' => t('The weekly reservation limit for this user type.'),
-//    '#required' => TRUE,
-//    '#size' => 5,
-//    '#maxlength' => 2
-//  );
+  $form['max_daily'] = array(
+    '#type' => 'textfield',
+    '#default_value' => isset($type->max_daily) ? $type->max_daily : 1,
+    '#description' => t('The daily reservation limit for this user type.'),
+    '#required' => TRUE,
+    '#size' => 5,
+    '#maxlength' => 2
+  );
+
+  $form['max_weekly'] = array(
+    '#type' => 'textfield',
+    '#default_value' => isset($type->max_weekly) ? $type->max_weekly : 5,
+    '#description' => t('The weekly reservation limit for this user type.'),
+    '#required' => TRUE,
+    '#size' => 5,
+    '#maxlength' => 2
+  );
 
   // Allow additional elements to be added to form.
   drupal_alter('studyroom_reservation_type_form', $form, $type);

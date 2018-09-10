@@ -183,6 +183,34 @@ function studyroom_reservation_schema() {
         'size' => 'tiny',
         'description' => 'A boolean indicating whether the administrator may delete this type.',
       ),
+      'min_duration' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+        'description' => "min duration column"
+      ),
+      'max_duration' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+        'description' => "max duration column"
+      ),
+      'max_daily' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+        'description' => "daily reservation limit"
+      ),
+      'max_weekly' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+        'description' => "weekly reservation limit"
+      ),
       // These two fields provide exportable support
       // and come from Entity module definitions.
       'status' => array(
