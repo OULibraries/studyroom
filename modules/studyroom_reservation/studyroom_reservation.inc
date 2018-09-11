@@ -67,6 +67,7 @@ class StudyroomReservation extends Entity {
    */
   public function checkRuleMaxResvPer($user_name = NULL) {
     $type = studyroom_reservation_type_load($this->type);
+
     if (!$type->public || !$type->ui) {
       return 0;
     }
@@ -93,6 +94,7 @@ class StudyroomReservation extends Entity {
     $day_end = $selected_day_start->add(new DateInterval('P1D'));
     $rule_day_end = $day_end->format('Y-m-d H:i:s');
 
+    // get user's current reservations for the week
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'studyroom_reservation')
       ->propertyCondition('type', $this->type)
@@ -109,6 +111,7 @@ class StudyroomReservation extends Entity {
 
     $weeklyCount = count($resvs);
 
+    // get user's current reservations for the day
     $query_daily = new EntityFieldQuery();
     $query_daily->entityCondition('entity_type', 'studyroom_reservation')
       ->propertyCondition('type', $this->type)
@@ -125,7 +128,27 @@ class StudyroomReservation extends Entity {
 
     $dailyCount = count($resvs_daily);
 
-    $countArray = array('daily' => $dailyCount,'weekly' => $weeklyCount);
+    // defaults for the max values
+    $max_daily = 5;
+    $max_weekly = 25;
+
+    $query_studyroom_reservation_type = new EntityFieldQuery();
+    $query_studyroom_reservation_type->entityCondition('entity_type', 'studyroom_reservation_type')
+      ->entityCondition('entity_type', 'studyroom_reservation_type')
+      ->propertyCondition('type', $this->type);
+
+    $results_studyroom_reservation_type = $query_studyroom_reservation_type->execute();
+    if (isset($results_studyroom_reservation_type['studyroom_reservation_type'])) {
+      $items_nids = array_keys($results_studyroom_reservation_type['studyroom_reservation_type']);
+      $items = entity_load('studyroom_reservation_type', $items_nids);
+
+      foreach ($items as $item) {
+        $max_daily = $item->max_daily;
+        $max_weekly = $item->max_weekly;
+      }
+    }
+
+    $countArray = array('daily' => $dailyCount, 'weekly' => $weeklyCount, 'max_daily' => $max_daily, 'max_weekly' => $max_weekly);
     return $countArray;
   }
 }
