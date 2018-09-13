@@ -151,6 +151,29 @@ class StudyroomReservation extends Entity {
     $countArray = array('daily' => $dailyCount, 'weekly' => $weeklyCount, 'max_daily' => $max_daily, 'max_weekly' => $max_weekly);
     return $countArray;
   }
+
+  /**
+   * Get min/max duration based on user/reservation type.
+   */
+  public function getMinMaxByResType() {
+    $query_studyroom_reservation_type = new EntityFieldQuery();
+    $query_studyroom_reservation_type->entityCondition('entity_type', 'studyroom_reservation_type')
+      ->entityCondition('entity_type', 'studyroom_reservation_type')
+      ->propertyCondition('type', $this->type);
+
+    $results_studyroom_reservation_type = $query_studyroom_reservation_type->execute();
+    if (isset($results_studyroom_reservation_type['studyroom_reservation_type'])) {
+      $items_nids = array_keys($results_studyroom_reservation_type['studyroom_reservation_type']);
+      $items = entity_load('studyroom_reservation_type', $items_nids);
+
+      foreach ($items as $item) {
+        $min_duration = $item->min_duration;
+        $max_duration = $item->max_duration;
+      }
+    }
+
+    return array('min_duration' => $min_duration, 'max_duration' => $max_duration);
+  }
 }
 
 /**
@@ -172,6 +195,8 @@ class StudyroomReservationType extends Entity {
    * Override save function to add default values.
    */
   public function save() {
+    debug($this->min_duration);
+    debug($this->max_duration);
     if (!isset($this->min_duration)) {
       $this->min_duration = $this->defaultMinDuration();
     }
@@ -208,8 +233,11 @@ class StudyroomReservationType extends Entity {
    * @return array
    *   array of options formated for use in select form element
    */
-  public function optionsMinDuration() {
-    return drupal_map_assoc(array(0, 900, 1800, 3600, 7200, 10800, 14400), 'format_interval');
+  public function optionsMinDuration($min) {
+    $values = array(
+      0, 900, 1800, 3600, 7200, 10800, 14400
+    );
+    return drupal_map_assoc($values, 'format_interval');
   }
 
   /**
@@ -218,9 +246,10 @@ class StudyroomReservationType extends Entity {
    * @return array
    *   array of options formated for use in select form element
    */
-  public function optionsMaxDuration() {
+  public function optionsMaxDuration($max) {
     $values = array(
-      0, 900, 1800, 3600, 7200, 10800, 14400, 21600, 32400, 43200, 64800, 86400);
+      0, 900, 1800, 3600, 7200, 10800, 14400, 21600, 32400, 43200, 64800, 86400
+    );
     return drupal_map_assoc($values, 'format_interval');
   }
 }

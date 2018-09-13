@@ -323,11 +323,14 @@ function studyroom_reservation_type_form($form, &$form_state, $type, $op = 'edit
     '#default_value' => isset($type->increment_limits['hours_large']) ? $type->increment_limits['hours_large'] : 0,
   );
 
+  $minDuration = isset($type->min_duration) ? $type->min_duration : $type->defaultMinDuration();
+  $maxDuration = isset($type->max_duration) ? $type->max_duration : $type->defaultMaxDuration();
+
   $form['min_duration'] = array(
     '#type' => 'select',
     '#title' => t('Minimum duration'),
     '#options' => $type->optionsMinDuration(),
-    '#default_value' => isset($type->min_duration) ? $type->min_duration : $type->defaultMinDuration(),
+    '#default_value' => $minDuration,
     '#description' => t('The minimum length of time of a reservation.'),
     '#access' => $type->public,
   );
@@ -335,7 +338,7 @@ function studyroom_reservation_type_form($form, &$form_state, $type, $op = 'edit
     '#type' => 'select',
     '#title' => t('Maximum duration'),
     '#options' => $type->optionsMaxDuration(),
-    '#default_value' => isset($type->max_duration) ? $type->max_duration : $type->defaultMaxDuration(),
+    '#default_value' => $maxDuration,
     '#description' => t('The maximum length of time of a reservation.'),
     '#access' => $type->public,
   );
