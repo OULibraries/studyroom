@@ -195,8 +195,6 @@ class StudyroomReservationType extends Entity {
    * Override save function to add default values.
    */
   public function save() {
-    debug($this->min_duration);
-    debug($this->max_duration);
     if (!isset($this->min_duration)) {
       $this->min_duration = $this->defaultMinDuration();
     }
@@ -217,7 +215,7 @@ class StudyroomReservationType extends Entity {
    * Return default value.
    */
   public function defaultMinDuration() {
-    return '900';
+    return '1800';
   }
 
   /**
@@ -235,7 +233,7 @@ class StudyroomReservationType extends Entity {
    */
   public function optionsMinDuration($min) {
     $values = array(
-      0, 900, 1800, 3600, 7200, 10800, 14400
+      1800, 3600, 7200, 10800, 14400
     );
     return drupal_map_assoc($values, 'format_interval');
   }
@@ -248,7 +246,7 @@ class StudyroomReservationType extends Entity {
    */
   public function optionsMaxDuration($max) {
     $values = array(
-      0, 900, 1800, 3600, 7200, 10800, 14400, 21600, 32400, 43200, 64800, 86400
+      1800, 3600, 7200, 10800, 14400, 21600, 32400, 43200, 64800, 86400
     );
     return drupal_map_assoc($values, 'format_interval');
   }

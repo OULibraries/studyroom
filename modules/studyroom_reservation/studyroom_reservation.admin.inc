@@ -195,10 +195,6 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
   $studyroom->min_duration = $durationArray['min_duration'];
   $studyroom->max_duration = $durationArray['max_duration'];
 
-//  debug('test');
-//  debug($studyroom->min_duration);
-//  debug($studyroom->max_duration);
-//  debug($studyroom->durationMinutes());
   // Space(s).
   if (!empty($studyroom_space)) {
     $form['space_id_display'] = array(
