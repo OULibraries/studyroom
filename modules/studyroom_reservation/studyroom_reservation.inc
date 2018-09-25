@@ -231,7 +231,7 @@ class StudyroomReservationType extends Entity {
    * @return array
    *   array of options formated for use in select form element
    */
-  public function optionsMinDuration($min) {
+  public function optionsMinDuration() {
     $values = array(
       1800, 3600, 7200, 10800, 14400
     );
@@ -244,7 +244,7 @@ class StudyroomReservationType extends Entity {
    * @return array
    *   array of options formated for use in select form element
    */
-  public function optionsMaxDuration($max) {
+  public function optionsMaxDuration() {
     $values = array(
       1800, 3600, 7200, 10800, 14400, 21600, 32400, 43200, 64800, 86400
     );
