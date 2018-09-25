@@ -607,7 +607,7 @@ function studyroom_reservation_create_field_instance_reservation_datetime($bundl
   $instance = field_info_instance('studyroom_reservation', 'field_reservation_datetime', $bundle);
   if (empty($instance)) {
     $instance = array(
-      'label' => 'Reservation date & time',
+      'label' => 'Reservation date and time',
       'widget' => array(
         'weight' => '-40',
         'type' => 'date_popup',

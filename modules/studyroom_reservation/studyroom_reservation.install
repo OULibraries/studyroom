@@ -198,6 +198,34 @@ function studyroom_reservation_schema() {
         'not null' => FALSE,
         'description' => 'The name of the providing module if the entity has been defined in code.',
       ),
+      'min_duration' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+        'description' => "min duration column"
+      ),
+      'max_duration' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+        'description' => "max duration column"
+      ),
+      'max_daily' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+        'description' => "daily reservation limit"
+      ),
+      'max_weekly' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+        'description' => "weekly reservation limit"
+      )
     ),
     'primary key' => array('type'),
     'unique keys' => array(
@@ -229,4 +257,53 @@ function studyroom_reservation_update_7001() {
 
   // Remove unused language field.
   db_drop_field('studyroom_reservation', 'language');  
+}
+
+// add new tables. Min/Max duration, max daily limit, and max weekly limit.
+function studyroom_reservation_update_7002() {
+  drupal_flush_all_caches();
+
+  $schema['min_duration'] = array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    'description' => "min duration column"
+  );
+
+  $schema['max_duration'] = array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    'description' => "max duration column"
+  );
+
+  //add min duration
+  db_add_field('studyroom_reservation_type', 'min_duration', $schema['min_duration']);
+
+  //add max duration
+  db_add_field('studyroom_reservation_type', 'max_duration', $schema['max_duration']);
+
+  $schema['max_daily'] = array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    'description' => "daily reservation limit"
+  );
+
+  $schema['max_weekly'] = array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    'description' => "weekly reservation limit"
+  );
+
+  //add max daily reservation limit
+  db_add_field('studyroom_reservation_type', 'max_daily', $schema['max_daily']);
+
+  //add max weekly reservation limit
+  db_add_field('studyroom_reservation_type', 'max_weekly', $schema['max_weekly']);
 }
