@@ -98,6 +98,12 @@ function studyroom_reservation_uninstall() {
   foreach ($types as $type) {
     field_attach_delete_bundle('studyroom_reservation', $type);
   }
+  
+  //remove newer columns from reservation_type
+  db_drop_field('studyroom_reservation_type', 'min_duration');
+  db_drop_field('studyroom_reservation_type', 'max_duration');
+  db_drop_field('studyroom_reservation_type', 'max_daily');
+  db_drop_field('studyroom_reservation_type', 'max_weekly');
 }
 
 /**
@@ -241,34 +247,6 @@ function studyroom_reservation_schema() {
         'length' => 255,
         'not null' => FALSE,
         'description' => 'The name of the providing module if the entity has been defined in code.',
-      ),
-      'min_duration' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'unsigned' => TRUE,
-        'default' => 0,
-        'description' => "min duration column",
-      ),
-      'max_duration' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'unsigned' => TRUE,
-        'default' => 0,
-        'description' => "max duration column",
-      ),
-      'max_daily' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'unsigned' => TRUE,
-        'default' => 0,
-        'description' => "daily reservation limit",
-      ),
-      'max_weekly' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'unsigned' => TRUE,
-        'default' => 0,
-        'description' => "weekly reservation limit",
       )
     ),
     'primary key' => array('type'),
@@ -278,6 +256,40 @@ function studyroom_reservation_schema() {
   );
 
   return $schema;
+}
+
+/**
+* Update schema
+*/ 
+function studyroom_reservation_schema_alter(&$schema) {
+  $schema['studyroom_reservation_type']['fields']['min_duration'] = array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    'description' => "min duration column",
+  );
+  $schema['studyroom_reservation_type']['fields']['max_duration'] = array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    'description' => "max duration column",
+  );
+  $schema['studyroom_reservation_type']['fields']['max_daily'] = array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    'description' => "daily reservation limit",
+  );
+  $schema['studyroom_reservation_type']['fields']['max_weekly'] = array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    'description' => "weekly reservation limit",
+  );
 }
 
 /**
@@ -304,7 +316,7 @@ function studyroom_reservation_update_7001() {
 }
 
 // add new tables. Min/Max duration, max daily limit, and max weekly limit.
-function studyroom_reservation_update_7100() {
+function studyroom_reservation_update_7002() {
   $min_duration = array(
     'type' => 'int',
     'not null' => TRUE,
