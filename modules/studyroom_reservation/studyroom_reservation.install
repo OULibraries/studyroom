@@ -261,9 +261,7 @@ function studyroom_reservation_update_7001() {
 
 // add new tables. Min/Max duration, max daily limit, and max weekly limit.
 function studyroom_reservation_update_7002() {
-  drupal_flush_all_caches();
-
-  $schema['min_duration'] = array(
+  $min_duration = array(
     'type' => 'int',
     'not null' => TRUE,
     'unsigned' => TRUE,
@@ -271,7 +269,7 @@ function studyroom_reservation_update_7002() {
     'description' => "min duration column"
   );
 
-  $schema['max_duration'] = array(
+  $max_duration = array(
     'type' => 'int',
     'not null' => TRUE,
     'unsigned' => TRUE,
@@ -280,12 +278,12 @@ function studyroom_reservation_update_7002() {
   );
 
   //add min duration
-  db_add_field('studyroom_reservation_type', 'min_duration', $schema['min_duration']);
+  db_add_field('studyroom_reservation_type', 'min_duration', $min_duration);
 
   //add max duration
-  db_add_field('studyroom_reservation_type', 'max_duration', $schema['max_duration']);
+  db_add_field('studyroom_reservation_type', 'max_duration', $max_duration);
 
-  $schema['max_daily'] = array(
+  $max_daily = array(
     'type' => 'int',
     'not null' => TRUE,
     'unsigned' => TRUE,
@@ -293,7 +291,7 @@ function studyroom_reservation_update_7002() {
     'description' => "daily reservation limit"
   );
 
-  $schema['max_weekly'] = array(
+  $max_weekly = array(
     'type' => 'int',
     'not null' => TRUE,
     'unsigned' => TRUE,
@@ -302,8 +300,8 @@ function studyroom_reservation_update_7002() {
   );
 
   //add max daily reservation limit
-  db_add_field('studyroom_reservation_type', 'max_daily', $schema['max_daily']);
+  db_add_field('studyroom_reservation_type', 'max_daily', $max_daily);
 
   //add max weekly reservation limit
-  db_add_field('studyroom_reservation_type', 'max_weekly', $schema['max_weekly']);
+  db_add_field('studyroom_reservation_type', 'max_weekly', $max_weekly);
 }
