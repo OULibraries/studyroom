@@ -304,7 +304,7 @@ function studyroom_reservation_update_7001() {
 }
 
 // add new tables. Min/Max duration, max daily limit, and max weekly limit.
-function studyroom_reservation_update_7002() {
+function studyroom_reservation_update_7100() {
   $min_duration = array(
     'type' => 'int',
     'not null' => TRUE,
