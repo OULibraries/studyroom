@@ -203,28 +203,28 @@ function studyroom_reservation_schema() {
         'not null' => TRUE,
         'unsigned' => TRUE,
         'default' => 0,
-        'description' => "min duration column"
+        'description' => "min duration column",
       ),
       'max_duration' => array(
         'type' => 'int',
         'not null' => TRUE,
         'unsigned' => TRUE,
         'default' => 0,
-        'description' => "max duration column"
+        'description' => "max duration column",
       ),
       'max_daily' => array(
         'type' => 'int',
         'not null' => TRUE,
         'unsigned' => TRUE,
         'default' => 0,
-        'description' => "daily reservation limit"
+        'description' => "daily reservation limit",
       ),
       'max_weekly' => array(
         'type' => 'int',
         'not null' => TRUE,
         'unsigned' => TRUE,
         'default' => 0,
-        'description' => "weekly reservation limit"
+        'description' => "weekly reservation limit",
       )
     ),
     'primary key' => array('type'),
