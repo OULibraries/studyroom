@@ -36,12 +36,18 @@ class SpaceAvailability {
       $this->spaces_header[$space_id] = l(t($space->shortLabel()), $url['path'] . '/' . $date->format('Y/W'));
     }
 
+debug($spaces);
+debug(studyroom_limit_start());
+
     $rows = array();
     $time = new DateObject($date->format('Y-m-d') . ' ' . studyroom_limit_start());
     $this->current_time = time();
     $this->today = date_now();
     $this->day_diff = $this->today->difference($date, 'days', FALSE);
-
+	  
+debug($this);
+debug($time);
+	  
     // Loop through each time_increment of the day.
     for ($x = 0; $x <= $this->rowCount(); $x++) {
       $rows[$x]['hour'] = date_format_date($time, 'custom', 'g:i');
