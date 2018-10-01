@@ -134,7 +134,7 @@ function studyroom_settings_form() {
     '#type' => 'select',
     '#title' => t('Limit end time'),
     '#default_value' => variable_get('studyroom_limit_end', ''),
-    '#options' => array('' => '- None -') + drupal_map_assoc($hours, 'studyroom_format_hours_ampm') + array('last' => '11:59 pm'),
+    '#options' => array('' => '- None -') + drupal_map_assoc($hours, 'studyroom_format_hours_ampm'),
     '#description' => t("Set the global day end time.  No times used in this package will be allowed to end after this time."),
   );
 
@@ -240,7 +240,7 @@ function studyroom_limit_start() {
  */
 function studyroom_limit_end($real = FALSE) {
   $hour = variable_get('studyroom_limit_end', NULL);
-  if (!isset($hour) || $hour=='last') {
+  if (!isset($hour)) {
     return '23:59:59';
     // Old: return ($real) ? '24:00:00' : '23:59:59';
   }
