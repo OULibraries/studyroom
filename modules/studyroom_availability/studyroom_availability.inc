@@ -36,17 +36,11 @@ class SpaceAvailability {
       $this->spaces_header[$space_id] = l(t($space->shortLabel()), $url['path'] . '/' . $date->format('Y/W'));
     }
 
-watchdog('studyroom_availability', $spaces, NULL, WATCHDOG_NOTICE);
-watchdog('studyroom_availability', studyroom_limit_start(), NULL, WATCHDOG_NOTICE);
-
     $rows = array();
     $time = new DateObject($date->format('Y-m-d') . ' ' . studyroom_limit_start());
     $this->current_time = time();
     $this->today = date_now();
     $this->day_diff = $this->today->difference($date, 'days', FALSE);
-	  
-watchdog('studyroom_availability', $this, NULL, WATCHDOG_NOTICE);
-watchdog('studyroom_availability', $time, NULL, WATCHDOG_NOTICE);
 	  
     // Loop through each time_increment of the day.
     for ($x = 0; $x <= $this->rowCount(); $x++) {
