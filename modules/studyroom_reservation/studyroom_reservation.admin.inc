@@ -410,16 +410,18 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   if (isset($form_state['values']['user_name'])) {
     $rule_max_per = $entity->checkRuleMaxResvPer($form_state['values']['user_name']);
 
-    // check for daily limit. deny creation if over
-    if ($rule_max_per['daily'] >= $rule_max_per['max_daily']) {
-      form_set_error('', t('You have reached the daily reservation limit of %count.
-        Please try again tomorrow.', array('%count' => $rule_max_per['max_daily'])));
-    }
+    if ($rule_max_per['bypass'] == false) {
+      // check for daily limit. deny creation if over
+      if ($rule_max_per['daily'] >= $rule_max_per['max_daily']) {
+        form_set_error('', t('You have reached the daily reservation limit of %count.
+          Please try again tomorrow.', array('%count' => $rule_max_per['max_daily'])));
+      }
 
-    // check for weekly limit. deny creation if over
-    if ($rule_max_per['weekly'] >= $rule_max_per['max_weekly']) {
-      form_set_error('', t('You have reached the weekly reservation limit of %count.
-        Please try again next week.', array('%count' => $rule_max_per['max_weekly'])));
+      // check for weekly limit. deny creation if over
+      if ($rule_max_per['weekly'] >= $rule_max_per['max_weekly']) {
+        form_set_error('', t('You have reached the weekly reservation limit of %count.
+          Please try again next week.', array('%count' => $rule_max_per['max_weekly'])));
+      }
     }
   }
 }
