@@ -410,7 +410,11 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   if (isset($form_state['values']['user_name'])) {
     $rule_max_per = $entity->checkRuleMaxResvPer($form_state['values']['user_name']);
 
-    if ($rule_max_per['bypass'] == false) {
+    $usernameCheck = $form_state['values']['user_name'];
+    
+    if ($usernameCheck == 'gradres' || $usernameCheck == 'facres' || $usernameCheck == 'undres') {
+      // don't check for limits.
+    } else {
       // check for daily limit. deny creation if over
       if ($rule_max_per['daily'] >= $rule_max_per['max_daily']) {
         form_set_error('', t('You have reached the daily reservation limit of %count.
