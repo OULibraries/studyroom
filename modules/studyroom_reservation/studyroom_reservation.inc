@@ -147,13 +147,8 @@ class StudyroomReservation extends Entity {
         $max_weekly = $item->max_weekly;
       }
     }
-
-    $bypass = false;
-    if ($type == 'gradres' || $type == 'facres' || $type == 'undres') {
-      $bypass = true;
-    }
     
-    $countArray = array('daily' => $dailyCount, 'weekly' => $weeklyCount, 'max_daily' => $max_daily, 'max_weekly' => $max_weekly, 'bypass' => $bypass);
+    $countArray = array('daily' => $dailyCount, 'weekly' => $weeklyCount, 'max_daily' => $max_daily, 'max_weekly' => $max_weekly);
     return $countArray;
   }
 
