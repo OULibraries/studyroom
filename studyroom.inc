@@ -205,6 +205,7 @@ class Studyroom {
   public function durationMinutes() {
     $increment = variable_get('studyroom_time_increment', '15');
     $increment = $increment * 60;
+
     $range = range($this->min_duration, $this->max_duration, $increment);
 
     // Remove minutes from everything over 4 hours.

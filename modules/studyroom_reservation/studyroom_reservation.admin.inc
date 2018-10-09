@@ -189,10 +189,12 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
   $studyroom = new Studyroom();
   $studyroom->entity_type = $studyroom_reservation_type;
   $studyroom->space = $studyroom_space;
-  $studyroom->min_duration = $studyroom->getMinDuration($studyroom_space, $studyroom->entity_type);
-  $studyroom->max_duration = $studyroom->getMaxDuration($studyroom_space, $studyroom->entity_type);
   $studyroom->max_days_advance = $studyroom->getMaxDaysAdvance($studyroom_space, $studyroom->entity_type);
 
+  $durationArray = $entity->getMinMaxByResType();
+  $studyroom->min_duration = $durationArray['min_duration'];
+  $studyroom->max_duration = $durationArray['max_duration'];
+  
   // Space(s).
   if (!empty($studyroom_space)) {
     $form['space_id_display'] = array(
@@ -407,12 +409,22 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   // Check if user has max reservation per day - rule.
   if (isset($form_state['values']['user_name'])) {
     $rule_max_per = $entity->checkRuleMaxResvPer($form_state['values']['user_name']);
-    $location = studyroom_space_location_load($studyroom->space->type);
-    if (isset($location->max_times_per_week) && $location->max_times_per_week > 0) {
-      // If more than rule, deny creation.
-      if ($rule_max_per >= $location->max_times_per_week) {
-        form_set_error('', t('You are trying to exceed the maximum reservation per week you are alllowed of %count.
-          Please try again next week.', array('%count' => $location->max_times_per_week)));
+
+    $usernameCheck = $form_state['values']['user_name'];
+    
+    if ($usernameCheck == 'gradres' || $usernameCheck == 'facres' || $usernameCheck == 'undres') {
+      // don't check for limits.
+    } else {
+      // check for daily limit. deny creation if over
+      if ($rule_max_per['daily'] >= $rule_max_per['max_daily']) {
+        form_set_error('', t('You have reached the daily reservation limit of %count for this type of room.
+          Please try again tomorrow.', array('%count' => $rule_max_per['max_daily'])));
+      }
+
+      // check for weekly limit. deny creation if over
+      if ($rule_max_per['weekly'] >= $rule_max_per['max_weekly']) {
+        form_set_error('', t('You have reached the weekly reservation limit of %count for this type of room.
+          Please try again next week.', array('%count' => $rule_max_per['max_weekly'])));
       }
     }
   }
