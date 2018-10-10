@@ -189,11 +189,9 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
   $studyroom = new Studyroom();
   $studyroom->entity_type = $studyroom_reservation_type;
   $studyroom->space = $studyroom_space;
+  $studyroom->min_duration = $studyroom->getMinDuration($studyroom_space, $studyroom->entity_type);
+  $studyroom->max_duration = $studyroom->getMaxDuration($studyroom_space, $studyroom->entity_type);
   $studyroom->max_days_advance = $studyroom->getMaxDaysAdvance($studyroom_space, $studyroom->entity_type);
-
-  $durationArray = $entity->getMinMaxByResType();
-  $studyroom->min_duration = $durationArray['min_duration'];
-  $studyroom->max_duration = $durationArray['max_duration'];
   
   // Space(s).
   if (!empty($studyroom_space)) {
