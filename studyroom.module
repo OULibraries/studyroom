@@ -240,7 +240,7 @@ function studyroom_limit_start() {
  */
 function studyroom_limit_end($real = FALSE) {
   $hour = variable_get('studyroom_limit_end', NULL);
-  if (!isset($hour) || $hour=='last') {
+  if (!isset($hour) || $hour == 'last') {
     return '23:59:59';
     // Old: return ($real) ? '24:00:00' : '23:59:59';
   }

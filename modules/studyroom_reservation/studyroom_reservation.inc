@@ -147,7 +147,7 @@ class StudyroomReservation extends Entity {
         $max_weekly = $item->max_weekly;
       }
     }
-
+    
     $countArray = array('daily' => $dailyCount, 'weekly' => $weeklyCount, 'max_daily' => $max_daily, 'max_weekly' => $max_weekly);
     return $countArray;
   }

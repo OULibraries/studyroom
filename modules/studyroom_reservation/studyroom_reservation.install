@@ -54,6 +54,12 @@ function studyroom_reservation_uninstall() {
   foreach ($types as $type) {
     field_attach_delete_bundle('studyroom_reservation', $type);
   }
+  
+  //remove newer columns from reservation_type
+  db_drop_field('studyroom_reservation_type', 'min_duration');
+  db_drop_field('studyroom_reservation_type', 'max_duration');
+  db_drop_field('studyroom_reservation_type', 'max_daily');
+  db_drop_field('studyroom_reservation_type', 'max_weekly');
 }
 
 /**
