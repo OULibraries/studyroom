@@ -323,6 +323,8 @@ function studyroom_reservation_type_form($form, &$form_state, $type, $op = 'edit
     '#default_value' => isset($type->increment_limits['hours_large']) ? $type->increment_limits['hours_large'] : 0,
   );
 
+  /* Duration values for reservation type are no longer used. The duration limits are based on the actual space then on location.
+   * Leaving here in case it is ever changed back to using reservation type
   $minDuration = isset($type->min_duration) ? $type->min_duration : $type->defaultMinDuration();
   $maxDuration = isset($type->max_duration) ? $type->max_duration : $type->defaultMaxDuration();
 
@@ -342,6 +344,7 @@ function studyroom_reservation_type_form($form, &$form_state, $type, $op = 'edit
     '#description' => t('The maximum length of time of a reservation.'),
     '#access' => $type->public,
   );
+  */
 
   $form['max_daily'] = array(
     '#type' => 'textfield',
