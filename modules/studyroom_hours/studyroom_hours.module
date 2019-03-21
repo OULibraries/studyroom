@@ -116,8 +116,8 @@ function studyroom_hours_element_info() {
 function studyroom_hours_element_process($element, &$form_state, $complete_form) {
   $element['#tree'] = TRUE;
 
-  $field_name = $element['#field_name'];
-  $langcode = isset($element['#language']) ? $element['#language'] : LANGUAGE_NONE;
+  //$field_name = $element['#field_name'];
+  //$langcode = isset($element['#language']) ? $element['#language'] : LANGUAGE_NONE;
   $instance = field_widget_instance($element, $form_state);
   $days = date_week_days_untranslated();
 

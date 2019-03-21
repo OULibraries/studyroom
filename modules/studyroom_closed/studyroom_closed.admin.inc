@@ -410,7 +410,7 @@ function studyroom_closed_conflict_form_submit($form, &$form_state) {
     $values = $form_state['values'];
 
     // @todo Figure out how to nofity user with this message.
-    $msg = ($values['customize_notice']) ? trim($values['message']) : FALSE;
+    //$msg = ($values['customize_notice']) ? trim($values['message']) : FALSE;
     studyroom_reservation_delete_multiple($values['reservations']);
 
     $form_state['redirect'] = STUDYROOM_CLOSED_MENU_ADMIN_SPACE;

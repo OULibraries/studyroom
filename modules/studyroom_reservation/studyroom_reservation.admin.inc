@@ -456,10 +456,9 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
             $week_start_orig->setTime(0, 0, 0);
             $rule_week_start_orig = $week_start_orig->format('Y-m-d H:i:s');
 
+            // only add to weekly count if it is the same start of the week. If not, keep weekly count as is and calculate as normal
             if ($rule_week_start == $rule_week_start_orig) { //same start of week
               $max_weekly++;
-            } else {
-              // keep weekly count as is and calculate as normal
             }
           }
         }

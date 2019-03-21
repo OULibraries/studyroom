@@ -921,7 +921,7 @@ function _studyroom_reservation_api_return($res_ids = array(), $by_date = FALSE)
 
     // Build reservation info.
     $key = $date_time->format('Y-m-d');
-    $r = new stdClass();
+    //$r = new stdClass();
     $r = $resveration;
     $r->res_date = $key;
     $r->start_time = $date_time->format('U');

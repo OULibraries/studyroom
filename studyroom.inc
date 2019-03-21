@@ -16,12 +16,12 @@ class Studyroom {
     $values = $form_state['values'];
     $min_field = 'min_duration';
     $max_field = 'max_duration';
-    $site_level = FALSE;
+    //$site_level = FALSE;
 
     if (isset($values['studyroom_' . $min_field])) {
       $min_field = 'studyroom_' . $min_field;
       $max_field = 'studyroom_' . $max_field;
-      $site_level = TRUE;
+      //$site_level = TRUE;
     }
 
     if (empty($values[$min_field])) {

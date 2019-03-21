@@ -28,9 +28,9 @@ function theme_hours_display($variables) {
 function theme_studyroom_hours($variables) {
   $element = $variables['element'];
 
-  $output = '';
+  //$output = '';
   $table_id = drupal_html_id($element['#field_name'] . '_values');
-  $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
+  //$required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
 
   $header = array(
     t('Weekday'),

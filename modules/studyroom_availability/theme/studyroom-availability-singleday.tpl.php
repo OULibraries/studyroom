@@ -27,7 +27,7 @@ $args = explode('/', drupal_get_path_alias());
       <th class="time"><?php print t('Time')?></th>
       <?php foreach ($week_days as $weekday): ?>
         <?php if ($weekday['today'] == TRUE) { ?>
-          <th class="day <?php ($weekday['today']) ? print 'today' : ''; ?>">
+          <th class="day <?php if(isset($weekday['today'])) { print 'today'; } ?>">
             <span class="weekday"><?php print $weekday['weekday']; ?></span><span class="weekday-date"><?php print $weekday['date']; ?></span>
           </th>
         <?php } ?>
