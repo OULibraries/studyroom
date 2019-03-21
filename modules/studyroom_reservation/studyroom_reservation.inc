@@ -289,7 +289,7 @@ class StudyroomReservationController extends EntityAPIController {
    *
    * Override delete to prevent deletion of locked types.
    */
-  public function delete($ids, ?DatabaseTransaction $transaction = NULL) {
+  public function delete($ids, DatabaseTransaction $transaction = NULL) {
     $entities = $ids ? $this->load($ids) : FALSE;
     if (!$entities) {
       // Do nothing, in case invalid or no ids have been passed.
@@ -378,7 +378,7 @@ class StudyroomReservationTypeController extends EntityAPIControllerExportable {
   /**
    * Save override.
    */
-  public function save($entity) {
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
     parent::save($entity);
 
     // Create new instance of field.
@@ -394,7 +394,7 @@ class StudyroomReservationTypeController extends EntityAPIControllerExportable {
    *
    * Override delete to prevent deletion of locked types.
    */
-  public function delete($ids, ?DatabaseTransaction $transaction = NULL) {
+  public function delete($ids, DatabaseTransaction $transaction = NULL) {
     $entities = $ids ? $this->load($ids) : FALSE;
     if (!$entities) {
       // Do nothing, in case invalid or no ids have been passed.

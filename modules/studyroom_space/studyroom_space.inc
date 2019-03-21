@@ -228,7 +228,7 @@ class StudyroomSpaceLocationController extends EntityAPIControllerExportable {
    *
    * Override to clear cache and rebuild menus.
    */
-  public function save($entity) {
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
     $return = parent::save($entity);
 
     if ($return == SAVED_NEW) {
@@ -248,7 +248,7 @@ class StudyroomSpaceLocationController extends EntityAPIControllerExportable {
    *
    * Override to clear cache and rebuild menus.
    */
-  public function delete($ids) {
+  public function delete($ids, DatabaseTransaction $transaction = NULL) {
     parent::delete($ids);
 
     // Clear types cache and force menu rebuild.
