@@ -394,7 +394,7 @@ class StudyroomReservationTypeController extends EntityAPIControllerExportable {
    *
    * Override delete to prevent deletion of locked types.
    */
-  public function delete($ids) {
+  public function delete($ids, ?DatabaseTransaction $transaction = NULL) {
     $entities = $ids ? $this->load($ids) : FALSE;
     if (!$entities) {
       // Do nothing, in case invalid or no ids have been passed.
