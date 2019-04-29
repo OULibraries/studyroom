@@ -322,6 +322,8 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     '#limit_validation_errors' => array(),
   );
 
+  // TODO possibly check time conflicts and show greyed out in time picker. $conflict = $entity->checkConflict();
+
   // Allow modules to modify the form.
   drupal_alter('studyroom_reservation_edit_form', $form, $form_state);
 
@@ -413,16 +415,70 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
     if ($usernameCheck == 'gradres' || $usernameCheck == 'facres' || $usernameCheck == 'undres') {
       // don't check for limits.
     } else {
+      $user_daily = isset($rule_max_per['daily']) && is_int($rule_max_per['daily']) ? $rule_max_per['daily'] : '';
+      $user_weekly = isset($rule_max_per['weekly']) && is_int($rule_max_per['weekly']) ? $rule_max_per['weekly'] : '';
+      $max_daily = isset($rule_max_per['max_daily']) && is_int($rule_max_per['max_daily']) ? $rule_max_per['max_daily'] : '';
+      $max_weekly = isset($rule_max_per['max_weekly']) && is_int($rule_max_per['max_weekly']) ? $rule_max_per['max_weekly'] : '';
+
+      // $rule_max_per returns 0 if user is not public or is ui. Don't check limits in this case.
+      // Also, if editing the form, need to check differently. Allow users to edit and not hit new limits
+      if ($rule_max_per != 0 && $form_state['studyroom_reservation']->reservation_id == '') {
+        // carry on as normal
+      } else {
+        // get reservation's original time
+        $query = db_select('field_data_field_reservation_datetime', 'f')
+          ->fields('f', array('field_reservation_datetime_value'))
+          ->condition('f.entity_id', $form_state['studyroom_reservation']->reservation_id)
+          ->execute();
+        $result = $query->fetchObject();
+        if (isset($result->field_reservation_datetime_value)) {
+          $orig_date = $result->field_reservation_datetime_value;
+          $dateRequested = $resv_date['value'];
+          $dateRequestedArray = explode(' ',$dateRequested);
+          $orig_dateArray = explode(' ',$orig_date);
+          if ($orig_dateArray[0] == $dateRequestedArray[0]) { // same day, add one to limits just in case so user can still save a new time for the day
+            $max_daily++;
+            $max_weekly++;
+          } else {
+            // different day, but still check for the week limit.
+            // If it is the same week, add one to the limit to allow the date to be edited. If it is a different week, do NOT add a day
+            // requested date week start
+            $selected_day_start = new DateTime($dateRequested);
+            $weekday = $selected_day_start->format('w');
+            $week_start = $selected_day_start->sub(new DateInterval('P' . $weekday . 'D'));
+            $week_start->setTime(0, 0, 0);
+            $rule_week_start = $week_start->format('Y-m-d H:i:s');
+
+            // original date week start
+            $orig_day_start = new DateTime($orig_date);
+            $weekday_orig = $orig_day_start->format('w');
+            $week_start_orig = $orig_day_start->sub(new DateInterval('P' . $weekday_orig . 'D'));
+            $week_start_orig->setTime(0, 0, 0);
+            $rule_week_start_orig = $week_start_orig->format('Y-m-d H:i:s');
+
+            if ($rule_week_start == $rule_week_start_orig) { //same start of week
+              $max_weekly++;
+            } else {
+              // keep weekly count as is and calculate as normal
+            }
+          }
+        }
+      }
+
       // check for daily limit. deny creation if over
-      if ($rule_max_per['daily'] >= $rule_max_per['max_daily']) {
-        form_set_error('', t('You have reached the daily reservation limit of %count for this type of room.
-          Please try again tomorrow.', array('%count' => $rule_max_per['max_daily'])));
+      if ($user_daily != '' && $max_daily != '') {
+        if ($user_daily >= $max_daily) {
+          form_set_error('', t('You have reached the daily reservation limit of %count for this specific day. 
+        To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.', ['%count' => $rule_max_per['max_daily']]));
+        }
       }
 
       // check for weekly limit. deny creation if over
-      if ($rule_max_per['weekly'] >= $rule_max_per['max_weekly']) {
-        form_set_error('', t('You have reached the weekly reservation limit of %count for this type of room.
-          Please try again next week.', array('%count' => $rule_max_per['max_weekly'])));
+      if ($user_weekly != '' && $max_weekly != '') {
+        if ($user_weekly >= $max_weekly) {
+          form_set_error('', t('You have reached the weekly reservation limit of %count for this specific week. 
+        To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.', ['%count' => $rule_max_per['max_weekly']]));
+        }
       }
     }
   }

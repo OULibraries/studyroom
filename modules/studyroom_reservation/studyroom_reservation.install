@@ -313,3 +313,13 @@ function studyroom_reservation_update_7100() {
   //add max weekly reservation limit
   db_add_field('studyroom_reservation_type', 'max_weekly', $schema['max_weekly']);
 }
+
+function studyroom_reservation_update_7003() {
+  drupal_flush_all_caches();
+
+  if db_table_exists('field_data_field_reservation_datetime')) {
+      if (!db_field_exists('field_data_field_reservation_datetime', 'field_reservation_datetime_value')) {
+        db_add_index('field_data_field_reservation_datetime', 'idx_field_reservation_datetime_value', array('field_reservation_datetime_value'));
+      }
+  }
+}

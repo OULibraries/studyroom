@@ -129,8 +129,8 @@ class StudyroomReservation extends Entity {
     $dailyCount = count($resvs_daily);
 
     // defaults for the max values
-    $max_daily = 5;
-    $max_weekly = 25;
+    $max_daily = 1;
+    $max_weekly = 7;
 
     $query_studyroom_reservation_type = new EntityFieldQuery();
     $query_studyroom_reservation_type->entityCondition('entity_type', 'studyroom_reservation_type')
@@ -147,8 +147,8 @@ class StudyroomReservation extends Entity {
         $max_weekly = $item->max_weekly;
       }
     }
-    
-    $countArray = array('daily' => $dailyCount, 'weekly' => $weeklyCount, 'max_daily' => $max_daily, 'max_weekly' => $max_weekly);
+
+    $countArray = array('daily' => $dailyCount, 'weekly' => $weeklyCount, 'max_daily' => intval($max_daily), 'max_weekly' => intval($max_weekly));
     return $countArray;
   }
 
