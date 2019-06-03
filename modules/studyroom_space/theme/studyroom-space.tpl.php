@@ -42,7 +42,7 @@
 <div class="<?php print $classes; ?> clearfix"<?php print $attributes; ?>>
   <div class="content"<?php print $content_attributes; ?>>
     <div id='calendar'></div>
-    <?php 
+    <?php
       hide($content['field_space_body']); 
       hide($content['location']);
       hide($content['max_days_advance']);
@@ -58,8 +58,8 @@
       hide($content['field_space_hours']);
       hide($content['status']);
       hide($content['feed_nid']);
-      hide($content['feed_url']);
-      hide($content['feed_guid']);
+      hide($content['feeds_item_guid']);
+      hide($content['feeds_item_url']);
 
       print render($content); ?>
   </div>
