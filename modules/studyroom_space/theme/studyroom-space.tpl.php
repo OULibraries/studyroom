@@ -57,7 +57,9 @@
       hide($content['field_space_category']);
       hide($content['field_space_hours']);
       hide($content['status']);
-      hide($content['feed_nid']);      
+      hide($content['feed_nid']);
+      hide($content['feed_url']);
+      hide($content['feed_guid']);
 
       print render($content); ?>
   </div>
