@@ -847,9 +847,11 @@ function studyroom_reservation_per_space_per_range($space, $year, $week, $json =
   $week_start = date_format_date($week_range[0], 'custom', 'Y-m-d H:i:s');
   $week_end = date_format_date($week_range[1], 'custom', 'Y-m-d H:i:s');
 
+  $tableName = $_SERVER["SERVER_NAME"] == 'libraries.php7dev.lib.ou.edu' ? 'drupal_libraries_php7dev' : 'drupal_libraries_webprod';
+
   $sql = "SELECT f.entity_type AS entity_type, f.entity_id AS entity_id, f.revision_id AS revision_id, f.bundle AS bundle
-    FROM drupal_libraries_php7dev.field_data_field_reservation_datetime f
-    LEFT JOIN drupal_libraries_php7dev.studyroom_reservation s
+    FROM ".$tableName.".field_data_field_reservation_datetime f
+    LEFT JOIN ".$tableName.".studyroom_reservation s
     ON s.reservation_id = f.entity_id
     WHERE (f.field_reservation_datetime_value BETWEEN :week_start AND :week_end)
     AND (f.deleted = '0')
