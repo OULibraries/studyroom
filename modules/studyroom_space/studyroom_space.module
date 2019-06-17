@@ -297,6 +297,7 @@ function studyroom_space_location_save(StudyroomSpaceLocation $type) {
   $type->save();
 }
 
+
 /**
  * Deletes a studyroom_space type from the db.
  */
