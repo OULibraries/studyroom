@@ -23,7 +23,7 @@ class StudyroomSpace extends Entity {
     $loc = variable_get('studyroom_space_title_location', 0);
     if ($loc) {
       $location = studyroom_space_location_load($this->type);
-      return str_replace('_', ' ',$location->label()) . ' - ' . $this->label;
+      return ucwords(str_replace('_', ' ',$location->label())) . ' - ' . $this->label;
 		}
 		else {
       return $this->label;
