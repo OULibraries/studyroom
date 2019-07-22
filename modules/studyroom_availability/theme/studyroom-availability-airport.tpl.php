@@ -113,9 +113,6 @@ $args = explode('/', drupal_get_path_alias());
                <area shape="poly" coords="230,512,342,502,351,606,239,617" href="/space/51/day/graduateimagemap">
                <area shape="poly" coords="345,503,455,493,463,595,351,604" href="/space/50/day/graduateimagemap">
                <area shape="poly" coords="457,490,569,482,577,586,464,594" href="/space/48/day/graduateimagemap">
-               <area shape="poly" coords="221,411,335,400,341,504,230,512" href="/space/56/day/graduateimagemap">
-               <area shape="poly" coords="334,400,446,390,456,494,341,500" href="/space/57/day/graduateimagemap">
-               <area shape="poly" coords="446,388,560,380,567,484,453,491" href="/space/58/day/graduateimagemap">
                <area shape="poly" coords="113,188,113,275,5,277,3,205,114,188,141,181,193,173,213,170,214,275,110,275" href="#" data-target="#myModal" data-toggle="modal">
                <area shape="poly" coords="215,170,257,166,300,161,317,158,312,276,213,277" href="#" data-target="#myModal" data-toggle="modal">
                <area shape="poly" coords="317,159,361,155,414,150,417,279,315,276" href="#" data-target="#myModal" data-toggle="modal">
