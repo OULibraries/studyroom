@@ -13,7 +13,7 @@ class studyroom_closed_handler_delete_link_field extends studyroom_closed_handle
    * Render the field.
    */
   public function render($values) {
-    $type = $values->{$this->aliases['type']};
+    //$type = $values->{$this->aliases['type']};
 
     $text = !empty($this->options['text']) ? $this->options['text'] : t('delete');
     $studyroom_closed_id = $values->{$this->aliases['studyroom_closed_id']};

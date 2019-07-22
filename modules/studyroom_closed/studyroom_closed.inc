@@ -58,7 +58,7 @@ class StudyroomClosedController extends EntityAPIController {
   /**
    * Delete override.
    */
-  public function delete($ids) {
+  public function delete($ids, DatabaseTransaction $transaction = NULL) {
     $entities = $ids ? $this->load($ids) : FALSE;
     if ($entities) {
       foreach ($entities as $id => $entity) {
@@ -76,7 +76,7 @@ class StudyroomClosedController extends EntityAPIController {
   /**
    * Save override.
    */
-  public function save($entity) {
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
     parent::save($entity);
     $this->entity = $entity;
     $this->name = $entity->name;

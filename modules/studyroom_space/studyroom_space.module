@@ -498,10 +498,8 @@ function studyroom_space_preprocess_entity_studyroom_space(&$variables) {
 
         $items[$key]['statusclass'] = $newArray[1];
         $items[$key]['statustext'] = $newArray[0];
-        $items['statusbarclass'] = ($items[$key]['statusclass'] != '-') ?
-          $items[$key]['statusclass'] : $items['statusbarclass'];
-        $items['statusText'] = ($items[$key]['statustext'] != '-') ?
-          $items[$key]['statustext'] : $items['statusText'];
+        $items['statusbarclass'] = ($items[$key]['statusclass'] != '-') ? $items[$key]['statusclass'] : (isset($items['statusbarclass']) ? $items['statusbarclass'] : '');
+        $items['statusText'] = ($items[$key]['statustext'] != '-') ? $items[$key]['statustext'] : (isset($items['statusText']) ? $items['statusText'] : '');
         // unset any time that has already passed
         if ($lastThirty > $items[$key]['stamp']) {
           unset($items[$key]);

@@ -20,7 +20,7 @@
     <tr>
       <th class="time"><?php print t('Time')?></th>
       <?php foreach ($week_days as $weekday): ?>
-        <th class="day <?php ($weekday['today']) ? print 'today' : ''; ?>">
+        <th class="day <?php if(isset($weekday['today'])) { print 'today'; } ?>">
           <span class="weekday"><?php print $weekday['weekday']; ?></span><span class="weekday-date"><?php print $weekday['date']; ?></span>
         </th>
       <?php endforeach; ?>

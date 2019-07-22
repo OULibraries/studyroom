@@ -23,7 +23,7 @@ class StudyroomSpace extends Entity {
     $loc = variable_get('studyroom_space_title_location', 0);
     if ($loc) {
       $location = studyroom_space_location_load($this->type);
-      return $location->label() . ' - ' . $this->label;
+      return ucwords(str_replace('_', ' ',$location->label())) . ' - ' . $this->label;
 		}
 		else {
       return $this->label;
@@ -228,7 +228,7 @@ class StudyroomSpaceLocationController extends EntityAPIControllerExportable {
    *
    * Override to clear cache and rebuild menus.
    */
-  public function save($entity) {
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
     $return = parent::save($entity);
 
     if ($return == SAVED_NEW) {
@@ -248,7 +248,7 @@ class StudyroomSpaceLocationController extends EntityAPIControllerExportable {
    *
    * Override to clear cache and rebuild menus.
    */
-  public function delete($ids) {
+  public function delete($ids, DatabaseTransaction $transaction = NULL) {
     parent::delete($ids);
 
     // Clear types cache and force menu rebuild.

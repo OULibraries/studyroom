@@ -34,7 +34,6 @@ function studyroom_space_views_default_views() {
   $handler->display->display_options['style_options']['columns'] = array(
     'label' => 'label',
     'type' => 'type',
-    'type' => 'type',
     'link_studyroom_space' => 'link_studyroom_space',
     'operations' => 'operations',
   );

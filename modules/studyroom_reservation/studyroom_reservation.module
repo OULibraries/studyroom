@@ -843,23 +843,37 @@ function studyroom_reservation_per_space_per_day($space_id, $date, $curr_reserva
  */
 function studyroom_reservation_per_space_per_range($space, $year, $week, $json = FALSE) {
   $week_range = date_week_range($week, $year);
-  // Was 'Y-m-d H:i:s' before.
-  $week_start = date_format_date($week_range[0], 'custom', 'Y-m-d');
-  $week_end = date_format_date($week_range[1], 'custom', 'Y-m-d');
 
-  $query = new EntityFieldQuery();
-  $entities = $query->entityCondition('entity_type', 'studyroom_reservation')
-                    ->propertyCondition('space_id', $space->space_id)
-                    ->fieldCondition('field_reservation_datetime', 'value', array($week_start, $week_end), 'BETWEEN')
-                    ->fieldOrderBy('field_reservation_datetime', 'value', 'ASC')
-                    ->execute();
+  $week_start = date_format_date($week_range[0], 'custom', 'Y-m-d H:i:s');
+  $week_end = date_format_date($week_range[1], 'custom', 'Y-m-d H:i:s');
 
-  // Return if no resverations found.
-  if (count($entities) == 0) {
+  $sql = "SELECT f.entity_type AS entity_type, f.entity_id AS entity_id, f.revision_id AS revision_id, f.bundle AS bundle
+    FROM field_data_field_reservation_datetime f
+    LEFT JOIN studyroom_reservation s
+    ON s.reservation_id = f.entity_id
+    WHERE (f.field_reservation_datetime_value BETWEEN :week_start AND :week_end)
+    AND (f.deleted = '0')
+    AND (s.space_id = :space_id)
+    AND (f.entity_type = 'studyroom_reservation')
+    ORDER BY f.field_reservation_datetime_value ASC";
+
+  $res_ids = array();
+
+  $result = db_query($sql, array(':week_start' => $week_start, ':week_end' => $week_end, ':space_id' => $space->space_id));
+
+  if ($result) {
+    while ($row = $result->fetchAssoc()) {
+      array_push($res_ids, $row['entity_id']);
+    }
+  } else {
     return array();
   }
 
-  $res_ids = array_keys($entities['studyroom_reservation']);
+  // no reservations found
+  if (count($res_ids) == 0) {
+    return array();
+  }
+
   if ($json) {
     return _studyroom_reservation_api_return_json($res_ids);
   }
@@ -882,7 +896,7 @@ function studyroom_reservation_per_time_range($start_time, $end_time) {
 
   $entities = $query->execute();
 
-  // Return if no resverations found.
+  // Return if no reservations found.
   if (count($entities) == 0) {
     return array();
   }
@@ -921,7 +935,7 @@ function _studyroom_reservation_api_return($res_ids = array(), $by_date = FALSE)
 
     // Build reservation info.
     $key = $date_time->format('Y-m-d');
-    $r = new stdClass();
+    //$r = new stdClass();
     $r = $resveration;
     $r->res_date = $key;
     $r->start_time = $date_time->format('U');
