@@ -20,10 +20,15 @@
   display:none;
 }
  
- #studyroom-reservation-edit-form #edit-space-id-display label {
-   display:none;
-  }
- 
-  #studyroom-reservation-edit-form #edit-space-id-display {
-    font-size: 2em;
-  }
+#studyroom-reservation-edit-form #edit-space-id-display label {
+  display:none;
+}
+
+#studyroom-reservation-edit-form #edit-space-id-display {
+  font-size: 2em;
+}
+
+/*hide the normal date input field for faculty form only*/
+body.page-reservation-add-faculty div#edit-field-reservation-datetime {
+  display: none;
+}
