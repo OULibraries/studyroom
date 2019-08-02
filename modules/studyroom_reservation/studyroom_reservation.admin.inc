@@ -351,76 +351,88 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   field_attach_form_validate('studyroom_reservation', $entity, $form, $form_state);
 
   $multi_date = false;
+  $resv_date_array = array();
+
   // Get field_reservation_datetime state & value.
   if ($entity->type == 'faculty') {
     $multi_res_lang = $form['field_multi_reservation_date_tim']['#language'];
 
-    // if single day is selected and there are no repeat reservations
-    if (isset($values['field_multi_reservation_date_tim'][$multi_res_lang][0]['show_repeat_settings']) && $values['field_multi_reservation_date_tim'][$multi_res_lang][0]['show_repeat_settings'] === 0) {
-      $resv_date = $values['field_multi_reservation_date_tim'][$multi_res_lang][0];
-      var_dump('single');
-      var_dump($resv_date);
-    } else { // user has requested multi-day reservations. Need to loop through dates and pass along an array of dates.
+    // if multi day options was requested
+    if (isset($values['field_multi_reservation_date_tim'][$multi_res_lang][0]['rrule']) && $values['field_multi_reservation_date_tim'][$multi_res_lang][0]['rrule'] !== NULL) {
       $multi_date = true;
-      $resv_date = $values['field_multi_reservation_date_tim'][$multi_res_lang][0];
-      var_dump('multi');
-      var_dump($resv_date);
     }
+
+    $resv_date_array = $values['field_multi_reservation_date_tim'][$multi_res_lang];
     $tz = $form['field_multi_reservation_date_tim'][$multi_res_lang][0]['#date_timezone'];
+
+    if ($multi_date === false) {
+      array_pop($resv_date_array);
+    }
   } else {
     $langcode = $form['field_reservation_datetime']['#language'];
-    $resv_date = array_shift($values['field_reservation_datetime'][$langcode]);
+    $resv_date_array = $values['field_reservation_datetime'][$langcode];
     $tz = $form['field_reservation_datetime'][$langcode][0]['#date_timezone'];
   }
 
-  // Get start and end time.
-  $entity->start_time = new DateObject($resv_date['value'], $tz, 'Y-m-d H:i:s');
-  $entity->end_time = clone $entity->start_time;
-  $entity->end_time = $entity->end_time->add(new DateInterval('PT' . $values['duration'] . 'S'));
+  var_dump('resv_date_array: ');
+  var_dump($resv_date_array);
 
-  // Check if reservation request before now().
-  $today = date_now();
-  $check_if_past = check_if_date_is_past($today, $entity->start_time, $entity->type);
-  if ($check_if_past !== true) { // if error is returned
-    form_set_error('', t($check_if_past));
-    return;
+  foreach ($resv_date_array as $resv_date) {
+    var_dump('now looping through resv_date:');
+    var_dump($resv_date);
+    // Get start and end time.
+    $entity->start_time = new DateObject($resv_date['value'], $tz, 'Y-m-d H:i:s');
+    $entity->end_time = clone $entity->start_time;
+    $entity->end_time = $entity->end_time->add(new DateInterval('PT' . $values['duration'] . 'S'));
+
+    var_dump('start: '.$entity->start_time);
+    var_dump('end: '.$entity->end_time);
+    // Check if reservation time is outside space/site hours.
+    $check_if_in_space_open_hours = check_if_date_within_space_open_hours($form_state['studyroom'], $entity->space_id, $entity, $values['duration'], $tz);
+    if ($check_if_in_space_open_hours !== TRUE) { // if error is returned
+      form_set_error('', t($check_if_in_space_open_hours));
+      return;
+    }
+    var_dump('passed open hrs check!');
+    // Check if reservation request before now().
+    $today = date_now();
+    $check_if_past = check_if_date_is_past($today, $entity->start_time, $entity->type);
+    if ($check_if_past !== TRUE) { // if error is returned
+      form_set_error('', t($check_if_past));
+      return;
+    }
+    var_dump('passed past check!');
+    // Check if reservation spans more than one day.
+    $check_if_covers_two_days = check_if_date_covers_two_days($entity->start_time, $entity->end_time);
+    if ($check_if_covers_two_days !== TRUE) { // if error is returned
+      form_set_error('', t($check_if_covers_two_days));
+      return;
+    }
+    var_dump('passed 2 days check!');
+    // Check if reservation is within the allowed "days out" or "max_days_advance"
+    $studyroom = $form_state['studyroom'];
+    $check_if_under_max_days_advance = check_if_date_within_max_days_advance($studyroom, $today, $entity->start_time);
+    if ($check_if_under_max_days_advance !== TRUE) { // if error is returned
+      form_set_error('', t($check_if_under_max_days_advance));
+      return;
+    }
+    var_dump('passed max days advance check!');
+    // Check if reservation has any existing conflicts
+    $check_if_conflict = check_if_reservation_has_conflict($entity, $entity->start_time);
+    if ($check_if_conflict !== TRUE) { //if error is returned
+      form_set_error('', t($check_if_conflict));
+      return;
+    }
+    var_dump('passed conflict check!');
   }
 
-  // Check if reservation spans more than one day.
-  $check_if_covers_two_days = check_if_date_covers_two_days($entity->start_time, $entity->end_time);
-  if ($check_if_covers_two_days !== true) { // if error is returned
-    form_set_error('', t($check_if_covers_two_days));
+  // Check if user has reached the max reservations allowed per day/week (only needs to be passed in once. not in loop)
+  $check_if_max_reached = check_if_user_max_reached($form_state, $entity, $resv_date_array, $multi_date);
+  if ($check_if_max_reached !== TRUE) { //if error is returned
+    form_set_error('', t($check_if_max_reached));
     return;
   }
-
-  // Check if reservation is within the allowed "days out" or "max_days_advance"
-  $studyroom = $form_state['studyroom'];
-  $check_if_under_max_days_advance = check_if_date_within_max_days_advance($studyroom, $today, $entity->start_time);
-  if ($check_if_under_max_days_advance !== true) { // if error is returned
-    form_set_error('', t($check_if_under_max_days_advance));
-    return;
-  }
-
-  // Check if reservation time is outside space/site hours.
-  $check_if_in_space_open_hours = check_if_date_within_space_open_hours($form_state['studyroom'], $entity);
-  if ($check_if_in_space_open_hours !== true) { // if error is returned
-    form_set_error('', t($check_if_in_space_open_hours));
-    return;
-  }
-
-  // Check if reservation has any existing conflicts
-  $check_if_conflict = check_if_reservation_has_conflict($entity);
-  if ($check_if_conflict !== true) { //if error is returned
-    form_set_error('',t($check_if_conflict));
-    return;
-  }
-
-  // Check if user has reached the max reservations allowed per day/week
-  $check_if_max_reached = check_if_user_max_reached($form_state, $entity, $resv_date, $multi_date);
-  if ($check_if_max_reached !== true) { //if error is returned
-    form_set_error('',t($check_if_max_reached));
-    return;
-  }
+  var_dump('passed user max check!');
 
   exit;
 }
@@ -431,7 +443,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
 function check_if_date_is_past($today, $start_time, $type) {
   $interval = $today->difference($start_time, 'minutes', FALSE);
   if ($interval < 0 || !user_access("edit any ".$type." studyroom_reservation")) {
-    return 'You cannot start a reservation in the past. Please select a date/time in the future.';
+    return 'Your reservation at '.str_replace(' America/Chicago', '', $start_time).' is in the past. Please select a date/time in the future.';
   } else {
     return true;
   }
@@ -443,7 +455,7 @@ function check_if_date_is_past($today, $start_time, $type) {
 function check_if_date_covers_two_days($start_time, $end_time) {
   if ($start_time->difference($end_time, 'days', FALSE)) {
     if ($end_time->format('H:i:s') != '00:00:00') {
-      return 'Your reservation cannot span more than one day. Please select an early start time or shorter duration.';
+      return 'Your reservation starting at '.str_replace(' America/Chicago', '', $start_time).' cannot span more than one day. Please select an early start time or shorter duration.';
     }
   }
   return true;
@@ -456,7 +468,7 @@ function check_if_date_within_max_days_advance($studyroom, $today, $start_time) 
   if (isset($studyroom->max_days_advance)) {
     if ($today->difference($start_time, 'days', FALSE) > $studyroom->max_days_advance) {
       $number_of_days = format_plural($studyroom->max_days_advance, '1 day', '@count days');
-      return 'The date you are trying to be use is beyond the limit of '.$number_of_days.' in the future.';
+      return 'Your reservation at '.str_replace(' America/Chicago', '', $start_time).' is beyond the limit of '.$number_of_days.' in the future.';
     }
   }
   return true;
@@ -465,31 +477,42 @@ function check_if_date_within_max_days_advance($studyroom, $today, $start_time) 
 /**
  * Check if requested date is within the space's available open hours
  */
-function check_if_date_within_space_open_hours($studyroom, $entity) {
+function check_if_date_within_space_open_hours($studyroom, $space_id, $entity, $duration, $tz) {
   if (!isset($studyroom->space)) {
-    $studyroom->space = studyroom_space_load($entity->space_id);
+    $studyroom->space = studyroom_space_load($space_id);
   }
 
-  $space_day_hours = $studyroom->space->hoursPerDate($entity->start_time);
-  if ($entity->start_time < $space_day_hours['start_time']) {
-    $time = $space_day_hours['start_time']->format('h:i a');
-    return 'Your reservation cannot start before '.$time.' on this day.';
+  $start_time = new DateObject($entity->start_time->originalTime, $tz, 'Y-m-d H:i:s');
+  $end_time = clone $start_time;
+  $end_time = $end_time->add(new DateInterval('PT' . $duration . 'S'));
+
+  $space_day_hours = $studyroom->space->hoursPerDate($start_time);
+
+  // if space hours are returned as null/empty, the room is closed.
+  if (empty($space_day_hours['start_time']) || empty($space_day_hours['end_time'])) {
+    return 'Your reservation starting at ' . $start_time->format('Y-m-d H:i:s') . ' occurs on a day that this room is not open. Please try again.';
+  } else { // hours returned, check if reservation is within hours.
+    if ($start_time < $space_day_hours['start_time']) {
+      $time = $space_day_hours['start_time']->format('h:i a');
+      return 'Your reservation starting at ' . $start_time->format('Y-m-d H:i:s') . ' cannot start before ' . $time . ' on this day.';
+    }
+
+    if ($end_time > $space_day_hours['end_time']) {
+      $time = $space_day_hours['end_time']->format('h:i a');
+      return 'Your reservation ending at ' . $end_time->format('Y-m-d H:i:s') . ' cannot end after ' . $time . ' on this day.';
+    }
   }
 
-  if ($entity->end_time > $space_day_hours['end_time']) {
-    $time = $space_day_hours['end_time']->format('h:i a');
-    return 'Your reservation cannot end after '.$time.' on this day.';
-  }
   return true;
 }
 
 /**
  * Check if requested date has an existing conflict
  */
-function check_if_reservation_has_conflict($entity) {
+function check_if_reservation_has_conflict($entity, $start_time) {
   $conflict = $entity->checkConflict();
   if ($conflict) {
-    return 'Your requested reservation conflicts with another reservation.  Please select a different start time and/or duration.';
+    return 'Your reservation at '.str_replace(' America/Chicago', '', $start_time).' conflicts with another reservation.  Please select a different start time and/or duration.';
   }
   return true;
 }
@@ -497,84 +520,80 @@ function check_if_reservation_has_conflict($entity) {
 /**
  * Check if user has reached the max reservations allowed per day/week
  */
-function check_if_user_max_reached($form_state, $entity, $resv_date, $multi_date = false) {
+function check_if_user_max_reached($form_state, $entity, $resv_date_array, $multi_date) {
   if (isset($form_state['values']['user_name'])) {
-    $rule_max_per = $entity->checkRuleMaxResvPer($form_state['values']['user_name']);
+    $rule_max_per = $entity->checkRuleMaxResvPer($form_state['values']['user_name'], $resv_date_array, $multi_date);
 
     $usernameCheck = $form_state['values']['user_name'];
-    var_dump('$usernameCheck: '.$usernameCheck);
+
     $user_daily = isset($rule_max_per['daily']) && is_int($rule_max_per['daily']) ? $rule_max_per['daily'] : '';
     $user_weekly = isset($rule_max_per['weekly']) && is_int($rule_max_per['weekly']) ? $rule_max_per['weekly'] : '';
     $max_daily = isset($rule_max_per['max_daily']) && is_int($rule_max_per['max_daily']) ? $rule_max_per['max_daily'] : '';
     $max_weekly = isset($rule_max_per['max_weekly']) && is_int($rule_max_per['max_weekly']) ? $rule_max_per['max_weekly'] : '';
 
-    if ($multi_date === false) { // single date requested
-      var_dump('single day max function hit');
-      if ($usernameCheck == 'gradres' || $usernameCheck == 'facres' || $usernameCheck == 'undres') {
-        // don't check for limits.
+    if ($usernameCheck == 'gradres' || $usernameCheck == 'facres' || $usernameCheck == 'undres') {
+      // don't check for limits.
+    }
+    else {
+      // $rule_max_per returns 0 if user is not public or is ui. Don't check limits in this case.
+      // Also, if editing the form, need to check differently. Allow users to edit and not hit new limits
+      if ($rule_max_per != 0 && $form_state['studyroom_reservation']->reservation_id == '') {
+        // New reservation, no need to check max at this point. Carry on as normal
       }
       else {
-        // $rule_max_per returns 0 if user is not public or is ui. Don't check limits in this case.
-        // Also, if editing the form, need to check differently. Allow users to edit and not hit new limits
-        if ($rule_max_per != 0 && $form_state['studyroom_reservation']->reservation_id == '') {
-          // New reservation, no need to check max at this point. Carry on as normal
-        }
-        else {
-          // Editing existing reservation. Get reservation's original time and check for maxes
-          $query = db_select('field_data_field_reservation_datetime', 'f')
-            ->fields('f', ['field_reservation_datetime_value'])
-            ->condition('f.entity_id', $form_state['studyroom_reservation']->reservation_id)
-            ->execute();
-          $result = $query->fetchObject();
-          if (isset($result->field_reservation_datetime_value)) {
-            $orig_date = $result->field_reservation_datetime_value;
-            $dateRequested = $resv_date['value'];
-            $dateRequestedArray = explode(' ', $dateRequested);
-            $orig_dateArray = explode(' ', $orig_date);
-            if ($orig_dateArray[0] == $dateRequestedArray[0]) { // same day, add one to limits just in case so user can still save a new time for the day
-              $max_daily++;
+        // Editing existing reservation. Get reservation's original time and check for maxes
+        $query = db_select('field_data_field_reservation_datetime', 'f')
+          ->fields('f', ['field_reservation_datetime_value'])
+          ->condition('f.entity_id', $form_state['studyroom_reservation']->reservation_id)
+          ->execute();
+        $result = $query->fetchObject();
+        if (isset($result->field_reservation_datetime_value)) {
+          $orig_date = $result->field_reservation_datetime_value;
+          $dateRequested = $resv_date['value'];
+          $dateRequestedArray = explode(' ', $dateRequested);
+          $orig_dateArray = explode(' ', $orig_date);
+          if ($orig_dateArray[0] == $dateRequestedArray[0]) { // same day, add one to limits just in case so user can still save a new time for the day
+            $max_daily++;
+            $max_weekly++;
+          }
+          else {
+            // different day, but still check for the week limit.
+            // If it is the same week, add one to the limit to allow the date to be edited. If it is a different week, do NOT add a day
+            // requested date week start
+            $selected_day_start = new DateTime($dateRequested);
+            $weekday = $selected_day_start->format('w');
+            $week_start = $selected_day_start->sub(new DateInterval('P' . $weekday . 'D'));
+            $week_start->setTime(0, 0, 0);
+            $rule_week_start = $week_start->format('Y-m-d H:i:s');
+            // original date week start
+            $orig_day_start = new DateTime($orig_date);
+            $weekday_orig = $orig_day_start->format('w');
+            $week_start_orig = $orig_day_start->sub(new DateInterval('P' . $weekday_orig . 'D'));
+            $week_start_orig->setTime(0, 0, 0);
+            $rule_week_start_orig = $week_start_orig->format('Y-m-d H:i:s');
+            // only add to weekly count if it is the same start of the week. If not, keep weekly count as is and calculate as normal
+            if ($rule_week_start == $rule_week_start_orig) { //same start of week
               $max_weekly++;
             }
-            else {
-              // different day, but still check for the week limit.
-              // If it is the same week, add one to the limit to allow the date to be edited. If it is a different week, do NOT add a day
-              // requested date week start
-              $selected_day_start = new DateTime($dateRequested);
-              $weekday = $selected_day_start->format('w');
-              $week_start = $selected_day_start->sub(new DateInterval('P' . $weekday . 'D'));
-              $week_start->setTime(0, 0, 0);
-              $rule_week_start = $week_start->format('Y-m-d H:i:s');
-              // original date week start
-              $orig_day_start = new DateTime($orig_date);
-              $weekday_orig = $orig_day_start->format('w');
-              $week_start_orig = $orig_day_start->sub(new DateInterval('P' . $weekday_orig . 'D'));
-              $week_start_orig->setTime(0, 0, 0);
-              $rule_week_start_orig = $week_start_orig->format('Y-m-d H:i:s');
-              // only add to weekly count if it is the same start of the week. If not, keep weekly count as is and calculate as normal
-              if ($rule_week_start == $rule_week_start_orig) { //same start of week
-                $max_weekly++;
-              }
-            }
-          }
-        }
-        // check for daily limit. deny creation if over
-        if ($user_daily != '' && $max_daily != '') {
-          if ($user_daily >= $max_daily) {
-            $daily_count = $rule_max_per['max_daily'];
-            return 'You have reached the daily reservation limit of ' . $daily_count . ' for this specific day. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
-          }
-        }
-        // check for weekly limit. deny creation if over
-        if ($user_weekly != '' && $max_weekly != '') {
-          if ($user_weekly >= $max_weekly) {
-            $weekly_count = $rule_max_per['max_weekly'];
-            return 'You have reached the weekly reservation limit of ' . $weekly_count . ' for this specific week. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
           }
         }
       }
-    }
-    else { // multi-date reservation. Needs to be calculated differently.
-      var_dump('multi day max function hit');
+
+      // check for daily limit. deny creation if over limit
+      if ($user_daily != '' && $max_daily != '') {
+        if ($user_daily >= $max_daily) {
+          $daily_count = $rule_max_per['max_daily'];
+          return 'In regards to your reservation at '.$entity->start_time.', you have reached the daily reservation limit of ' . $daily_count .' for that specific day. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
+        }
+      }
+
+      // check for weekly limit. deny creation if over limit
+      if ($user_weekly != '' && $max_weekly != '') {
+        if ($user_weekly >= $max_weekly) {
+          $weekly_count = $rule_max_per['max_weekly'];
+          return 'In regards to your reservation at '.$entity->start_time.', you have reached the weekly reservation limit of ' . $weekly_count . ' for that specific week. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
+        }
+      }
     }
   }
 
