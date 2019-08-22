@@ -427,7 +427,9 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   }
 
   // Check if user has reached the max reservations allowed per day/week (only needs to be passed in once. not in loop)
-  $check_if_max_reached = check_if_user_max_reached($form_state, $entity, $resv_date_array, $multi_date);
+  $check_if_max_reached = check_if_user_max_reached($form_state, $entity, $resv_date_array);
+  var_dump('check_if_max_reached value:');
+  var_dump($check_if_max_reached);
   if ($check_if_max_reached !== TRUE) { //if error is returned
     form_set_error('', t($check_if_max_reached));
     return;
@@ -520,14 +522,14 @@ function check_if_reservation_has_conflict($entity, $start_time) {
 /**
  * Check if user has reached the max reservations allowed per day/week
  */
-function check_if_user_max_reached($form_state, $entity, $resv_date_array, $multi_date) {
+function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
   if (isset($form_state['values']['user_name'])) {
-    $rule_max_per = $entity->checkRuleMaxResvPer($form_state['values']['user_name'], $resv_date_array, $multi_date);
+    $rule_max_per = $entity->checkRuleMaxResvPer($form_state['values']['user_name'], $resv_date_array);
+    var_dump('rule_max_per');
+    var_dump($rule_max_per);
 
     $usernameCheck = $form_state['values']['user_name'];
 
-    $user_daily = isset($rule_max_per['daily']) && is_int($rule_max_per['daily']) ? $rule_max_per['daily'] : '';
-    $user_weekly = isset($rule_max_per['weekly']) && is_int($rule_max_per['weekly']) ? $rule_max_per['weekly'] : '';
     $max_daily = isset($rule_max_per['max_daily']) && is_int($rule_max_per['max_daily']) ? $rule_max_per['max_daily'] : '';
     $max_weekly = isset($rule_max_per['max_weekly']) && is_int($rule_max_per['max_weekly']) ? $rule_max_per['max_weekly'] : '';
 
@@ -549,7 +551,7 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array, $mult
         $result = $query->fetchObject();
         if (isset($result->field_reservation_datetime_value)) {
           $orig_date = $result->field_reservation_datetime_value;
-          $dateRequested = $resv_date['value'];
+          $dateRequested = $resv_date_array[0]["value"];
           $dateRequestedArray = explode(' ', $dateRequested);
           $orig_dateArray = explode(' ', $orig_date);
           if ($orig_dateArray[0] == $dateRequestedArray[0]) { // same day, add one to limits just in case so user can still save a new time for the day
@@ -579,19 +581,32 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array, $mult
         }
       }
 
-      // check for daily limit. deny creation if over limit
-      if ($user_daily != '' && $max_daily != '') {
-        if ($user_daily >= $max_daily) {
-          $daily_count = $rule_max_per['max_daily'];
-          return 'In regards to your reservation at '.$entity->start_time.', you have reached the daily reservation limit of ' . $daily_count .' for that specific day. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
-        }
-      }
+      $max_daily_orig = isset($rule_max_per['max_daily']) && is_int($rule_max_per['max_daily']) ? $rule_max_per['max_daily'] : '';
+      $max_weekly_orig = isset($rule_max_per['max_weekly']) && is_int($rule_max_per['max_weekly']) ? $rule_max_per['max_weekly'] : '';
 
-      // check for weekly limit. deny creation if over limit
-      if ($user_weekly != '' && $max_weekly != '') {
-        if ($user_weekly >= $max_weekly) {
-          $weekly_count = $rule_max_per['max_weekly'];
-          return 'In regards to your reservation at '.$entity->start_time.', you have reached the weekly reservation limit of ' . $weekly_count . ' for that specific week. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
+      //remove max values (last 2 indexes) from array so just dates can be processed
+      array_pop($rule_max_per);
+      array_pop($rule_max_per);
+
+      // loop through the dates in $rule_max_per. Now in array form, it will break down each day and if the count reaches the max at any day, send an error back to the user.
+      foreach ($rule_max_per as $res_date_max) {
+        $user_daily = isset($res_date_max['daily']) && is_int($res_date_max['daily']) ? $res_date_max['daily'] : '';
+        $user_weekly = isset($res_date_max['weekly']) && is_int($res_date_max['weekly']) ? $res_date_max['weekly'] : '';
+
+        // check for daily limit. deny creation if over limit
+        if ($user_daily != '' && $max_daily != '') {
+          if ($user_daily > $max_daily) {
+            $daily_count = $max_daily_orig;
+            return 'In regards to your reservation at '.$res_date_max['day'].', you have reached the daily reservation limit of ' . $daily_count .' for that specific day. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
+          }
+        }
+
+        // check for weekly limit. deny creation if over limit
+        if ($user_weekly != '' && $max_weekly != '') {
+          if ($user_weekly > $max_weekly) {
+            $weekly_count = $max_weekly_orig;
+            return 'In regards to your reservation at '.$res_date_max['day'].', you have reached the weekly reservation limit of ' . $weekly_count . ' for that specific week. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
+          }
         }
       }
     }

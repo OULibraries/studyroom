@@ -65,7 +65,7 @@ class StudyroomReservation extends Entity {
   /**
    * Determine if a conflict exists.
    */
-  public function checkRuleMaxResvPer($user_name = NULL, $resv_date_array, $multi_date) {
+  public function checkRuleMaxResvPer($user_name = NULL, $resv_date_array) {
     // get type
     $type = studyroom_reservation_type_load($this->type);
 
@@ -104,13 +104,36 @@ class StudyroomReservation extends Entity {
     }
 
     $week_count_total = 0;
+    $current_week = '';
+    $current_weeklyCount = 0;
+    $week_check = true;
+    $countArray = array();
 
     foreach($resv_date_array as $resv_date) {
       // Get midnight of first day of week and set week and day starts
+      $resv_date_obj = new DateTime($resv_date['value']);
       $selected_day_start = new DateTime($resv_date['value']);
-      $weekday = $selected_day_start->format('w');
-      $week_start = $selected_day_start->sub(new DateInterval('P' . $weekday . 'D'));
+      $weekday = $resv_date_obj->format('w');
+      $week_start = $resv_date_obj->sub(new DateInterval('P' . $weekday . 'D'));
       $week_start->setTime(0, 0, 0);
+      $weeknumber = $week_start->format('W');
+      $dailyCount = 0;
+
+      if ($current_week == '' || $current_week != $weeknumber) {
+        $current_week = $week_start->format('W');
+        $week_count_total = 1;
+        $week_check = true;
+        //var_dump("New Week");
+        //var_dump($current_week);
+      } else {
+        $week_check = false;
+        $week_count_total++;
+        //var_dump("Same Week");
+        //var_dump($current_week);
+      }
+
+      //var_dump('week check: '.$week_check);
+      //var_dump("|||");
       $selected_day_start->setTime(0, 0, 0);
       $rule_week_start = $week_start->format('Y-m-d H:i:s');
       $rule_day_start = $selected_day_start->format('Y-m-d H:i:s');
@@ -121,23 +144,42 @@ class StudyroomReservation extends Entity {
       $day_end = $selected_day_start->add(new DateInterval('P1D'));
       $rule_day_end = $day_end->format('Y-m-d H:i:s');
 
-      // get user's current reservations for the week
-      $query = new EntityFieldQuery();
-      $query->entityCondition('entity_type', 'studyroom_reservation')
-        ->propertyCondition('type', $this->type)
-        ->propertyCondition('space_id', $space_ids, 'IN')
-        ->propertyCondition('uid', $uid)
-        ->fieldCondition('field_reservation_datetime', 'value', [
-          $rule_week_start,
-          $rule_week_end
-        ], 'BETWEEN')
-        ->fieldOrderBy('field_reservation_datetime', 'value', 'ASC');
-      $results = $query->execute();
-      $resvs = [];
-      if (isset($results['studyroom_reservation'])) {
-        $resvs = array_keys($results['studyroom_reservation']);
+      // get user's current reservations for the week.
+      // Only check once per week sent (if array of dates)
+      if ($week_check === true) {
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'studyroom_reservation')
+          ->propertyCondition('type', $this->type)
+          ->propertyCondition('space_id', $space_ids, 'IN')
+          ->propertyCondition('uid', $uid)
+          ->fieldCondition('field_reservation_datetime', 'value', [
+            $rule_week_start,
+            $rule_week_end
+          ], 'BETWEEN')
+          ->fieldOrderBy('field_reservation_datetime', 'value', 'ASC');
+        $results = $query->execute();
+        $resvs = [];
+        if (isset($results['studyroom_reservation'])) {
+          $resvs = array_keys($results['studyroom_reservation']);
+        }
+        $weeklyCount = $current_weeklyCount = count($resvs);
+        //var_dump("db week check");
+        //var_dump($weeklyCount);
+      } else {
+        $weeklyCount = $current_weeklyCount;
+        //var_dump("use last db week check");
+        //var_dump($weeklyCount);
       }
-      $weeklyCount = count($resvs);
+      //var_dump("----");
+
+      $weeklyCount = $weeklyCount + $week_count_total;
+      //var_dump("new weeklyCount");
+      //var_dump($weeklyCount);
+      //var_dump("****");
+
+      //var_dump('daily query');
+      //var_dump($rule_day_start);
+      //var_dump($rule_day_end);
 
       // get user's current reservations for the day
       $query_daily = new EntityFieldQuery();
@@ -155,11 +197,16 @@ class StudyroomReservation extends Entity {
       if (isset($results_daily['studyroom_reservation'])) {
         $resvs_daily = array_keys($results_daily['studyroom_reservation']);
       }
-      $dailyCount = count($resvs_daily);
+      $dailyCount = count($resvs_daily) + 1;
 
-    }
+      array_push($countArray, array('day'=>$resv_date['value'], 'weekly'=>$weeklyCount, 'daily'=>$dailyCount));
+    } // end of foreach($resv_date_array as $resv_date)
+
     // set up return var with all values
-    $countArray = array('daily' => $dailyCount, 'weekly' => $weeklyCount, 'max_daily' => intval($max_daily), 'max_weekly' => intval($max_weekly));
+    $countArray['max_daily'] = intval($max_daily);
+    $countArray['max_weekly'] = intval($max_weekly);
+//    var_dump('countArray');
+//    var_dump($countArray);
     return $countArray;
   }
 }
