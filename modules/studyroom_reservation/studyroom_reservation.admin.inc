@@ -354,6 +354,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   $resv_date_array = array();
 
   // Get field_reservation_datetime state & value.
+  // TODO add $entity->type == 'admin' to if below once admin form has multi-date as well.
   if ($entity->type == 'faculty') {
     $multi_res_lang = $form['field_multi_reservation_date_tim']['#language'];
 
@@ -374,26 +375,19 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
     $tz = $form['field_reservation_datetime'][$langcode][0]['#date_timezone'];
   }
 
-  var_dump('resv_date_array: ');
-  var_dump($resv_date_array);
-
   foreach ($resv_date_array as $resv_date) {
-    var_dump('now looping through resv_date:');
-    var_dump($resv_date);
     // Get start and end time.
     $entity->start_time = new DateObject($resv_date['value'], $tz, 'Y-m-d H:i:s');
     $entity->end_time = clone $entity->start_time;
     $entity->end_time = $entity->end_time->add(new DateInterval('PT' . $values['duration'] . 'S'));
 
-    var_dump('start: '.$entity->start_time);
-    var_dump('end: '.$entity->end_time);
     // Check if reservation time is outside space/site hours.
     $check_if_in_space_open_hours = check_if_date_within_space_open_hours($form_state['studyroom'], $entity->space_id, $entity, $values['duration'], $tz);
     if ($check_if_in_space_open_hours !== TRUE) { // if error is returned
       form_set_error('', t($check_if_in_space_open_hours));
       return;
     }
-    var_dump('passed open hrs check!');
+
     // Check if reservation request before now().
     $today = date_now();
     $check_if_past = check_if_date_is_past($today, $entity->start_time, $entity->type);
@@ -401,14 +395,14 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
       form_set_error('', t($check_if_past));
       return;
     }
-    var_dump('passed past check!');
+
     // Check if reservation spans more than one day.
     $check_if_covers_two_days = check_if_date_covers_two_days($entity->start_time, $entity->end_time);
     if ($check_if_covers_two_days !== TRUE) { // if error is returned
       form_set_error('', t($check_if_covers_two_days));
       return;
     }
-    var_dump('passed 2 days check!');
+
     // Check if reservation is within the allowed "days out" or "max_days_advance"
     $studyroom = $form_state['studyroom'];
     $check_if_under_max_days_advance = check_if_date_within_max_days_advance($studyroom, $today, $entity->start_time);
@@ -416,27 +410,21 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
       form_set_error('', t($check_if_under_max_days_advance));
       return;
     }
-    var_dump('passed max days advance check!');
+
     // Check if reservation has any existing conflicts
     $check_if_conflict = check_if_reservation_has_conflict($entity, $entity->start_time);
     if ($check_if_conflict !== TRUE) { //if error is returned
       form_set_error('', t($check_if_conflict));
       return;
     }
-    var_dump('passed conflict check!');
   }
 
   // Check if user has reached the max reservations allowed per day/week (only needs to be passed in once. not in loop)
   $check_if_max_reached = check_if_user_max_reached($form_state, $entity, $resv_date_array);
-  var_dump('check_if_max_reached value:');
-  var_dump($check_if_max_reached);
   if ($check_if_max_reached !== TRUE) { //if error is returned
     form_set_error('', t($check_if_max_reached));
     return;
   }
-  var_dump('passed user max check!');
-
-  exit;
 }
 
 /**
@@ -525,11 +513,7 @@ function check_if_reservation_has_conflict($entity, $start_time) {
 function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
   if (isset($form_state['values']['user_name'])) {
     $rule_max_per = $entity->checkRuleMaxResvPer($form_state['values']['user_name'], $resv_date_array);
-    var_dump('rule_max_per');
-    var_dump($rule_max_per);
-
     $usernameCheck = $form_state['values']['user_name'];
-
     $max_daily = isset($rule_max_per['max_daily']) && is_int($rule_max_per['max_daily']) ? $rule_max_per['max_daily'] : '';
     $max_weekly = isset($rule_max_per['max_weekly']) && is_int($rule_max_per['max_weekly']) ? $rule_max_per['max_weekly'] : '';
 
@@ -590,6 +574,7 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
 
       // loop through the dates in $rule_max_per. Now in array form, it will break down each day and if the count reaches the max at any day, send an error back to the user.
       foreach ($rule_max_per as $res_date_max) {
+        $local_datetime = date('m/d/Y h:iA', strtotime($res_date_max['day']));
         $user_daily = isset($res_date_max['daily']) && is_int($res_date_max['daily']) ? $res_date_max['daily'] : '';
         $user_weekly = isset($res_date_max['weekly']) && is_int($res_date_max['weekly']) ? $res_date_max['weekly'] : '';
 
@@ -597,7 +582,7 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
         if ($user_daily != '' && $max_daily != '') {
           if ($user_daily > $max_daily) {
             $daily_count = $max_daily_orig;
-            return 'In regards to your reservation at '.$res_date_max['day'].', you have reached the daily reservation limit of ' . $daily_count .' for that specific day. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
+            return 'In regards to your reservation at '.$local_datetime.', you have reached the daily reservation limit of ' . $daily_count .' for that specific day. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
           }
         }
 
@@ -605,7 +590,7 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
         if ($user_weekly != '' && $max_weekly != '') {
           if ($user_weekly > $max_weekly) {
             $weekly_count = $max_weekly_orig;
-            return 'In regards to your reservation at '.$res_date_max['day'].', you have reached the weekly reservation limit of ' . $weekly_count . ' for that specific week. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
+            return 'In regards to your reservation at '.$local_datetime.', you have reached the weekly reservation limit of ' . $weekly_count . ' for that specific week. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
           }
         }
       }
@@ -621,6 +606,8 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
  * @todo remove hard-coded link
  */
 function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
+  //var_dump($form_state['values']);
+
   $entity = entity_ui_controller('studyroom_reservation')->entityFormSubmitBuildEntity($form, $form_state);
   // Add in created and changed times.
   if ($entity->is_new = isset($entity->is_new) ? $entity->is_new : 0) {
@@ -637,6 +624,9 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
     $entity->uid = 0;
   }
   unset($entity->user_name);
+
+  var_dump($entity);
+  exit;
 
   $entity->save();
 
