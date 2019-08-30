@@ -606,32 +606,85 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
  * @todo remove hard-coded link
  */
 function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
-  //var_dump($form_state['values']);
+  $values = $form_state['values'];
+  $multi_date = false;
+  $resv_date_array = array();
+  $date = ''; //$date used for redirect
 
-  $entity = entity_ui_controller('studyroom_reservation')->entityFormSubmitBuildEntity($form, $form_state);
-  // Add in created and changed times.
-  if ($entity->is_new = isset($entity->is_new) ? $entity->is_new : 0) {
-    $entity->created = time();
+  if (isset($values['field_multi_reservation_date_tim'])) {
+    // if multi day options was requested
+    if (isset($values['field_multi_reservation_date_tim']['und'][0]['rrule']) && $values['field_multi_reservation_date_tim']['und'][0]['rrule'] !== NULL) {
+      $multi_date = true;
+    }
+
+    $resv_date_array = $values['field_multi_reservation_date_tim']['und'];
+    $tz = $form['field_multi_reservation_date_tim']['und'][0]['#date_timezone'];
+
+    if ($multi_date === false) {
+      array_pop($resv_date_array);
+    }
+
+    foreach ($resv_date_array as $resv_date) {
+      // Get start and end time.
+      $resv_date_string = $resv_date['value'];
+
+      // $date used for redirect. Set to first date.
+      if ($date === '') {
+        $date = new DateObject($resv_date_string);
+      }
+
+      //overwrite main date in form to be the current date in the loop
+      $form_state['values']['field_reservation_datetime']['und'][0]['value'] = $resv_date_string;
+
+      $entity = entity_ui_controller('studyroom_reservation')->entityFormSubmitBuildEntity($form, $form_state);
+
+      // Add in created and changed times.
+      if ($entity->is_new = isset($entity->is_new) ? $entity->is_new : 0) {
+        $entity->created = time();
+      }
+      $entity->changed = time();
+
+      // Set uid field based on user_name value.
+      $account = user_load_by_name($entity->user_name);
+      if ($account) {
+        $entity->uid = $account->uid;
+      }
+      else {
+        $entity->uid = 0;
+      }
+      unset($entity->user_name);
+
+      $entity->uuid->value = NULL;
+      $entity->nid->value = NULL;
+      $entity->is_new = 1;
+      $entity->reservation_id = NULL;
+
+      $entity->save();
+    }
+  } else { // no multi-date available for reservation tyoe
+    $entity = entity_ui_controller('studyroom_reservation')->entityFormSubmitBuildEntity($form, $form_state);
+    // Add in created and changed times.
+    if ($entity->is_new = isset($entity->is_new) ? $entity->is_new : 0) {
+      $entity->created = time();
+    }
+    $entity->changed = time();
+
+    // Set uid field based on user_name value.
+    $account = user_load_by_name($entity->user_name);
+    if ($account) {
+      $entity->uid = $account->uid;
+    }
+    else {
+      $entity->uid = 0;
+    }
+    unset($entity->user_name);
+
+    $entity->save();
+
+    // Get year/week to redirect to correct week of reservation.
+    $date = new DateObject($entity->start_time);
   }
-  $entity->changed = time();
 
-  // Set uid field based on user_name value.
-  $account = user_load_by_name($entity->user_name);
-  if ($account) {
-    $entity->uid = $account->uid;
-  }
-  else {
-    $entity->uid = 0;
-  }
-  unset($entity->user_name);
-
-  var_dump($entity);
-  exit;
-
-  $entity->save();
-
-  // Get year/week to redirect to correct week of reservation.
-  $date = new DateObject($entity->start_time);
   $args = explode('/', drupal_get_path_alias());
   $location = $form_state['studyroom']->space->type;
   // if this comes from the interactive map page and has the word 'image' in
@@ -652,7 +705,6 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
     $url = array($entity->space_id, $date->format('Y'), date_week($date));
     $form_state['redirect'] = STUDYROOM_SPACE_PATH . implode('/', $url);
   }
-
 }
 
 /**
