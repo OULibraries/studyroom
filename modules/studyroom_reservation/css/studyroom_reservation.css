@@ -12,6 +12,7 @@
   padding: 10px 5px 9px 10px;
   position: relative;
 }
+
 .studyroom-reservation-type-list li:last-child {
   border: 0 none;
 }
@@ -28,7 +29,7 @@
   font-size: 2em;
 }
 
-/*hide the normal date input field for faculty form only*/
-body.page-reservation-add-faculty div#edit-field-reservation-datetime {
+/* hide the normal date input field for faculty/admin form only. And hide the multi-date input on the edit form. */
+body.page-reservation-add-faculty div#edit-field-reservation-datetime, body.page-reservation-add-admin div#edit-field-reservation-datetime, body.page-reservation-edit #edit-field-multi-reservation-date-tim {
   display: none;
 }

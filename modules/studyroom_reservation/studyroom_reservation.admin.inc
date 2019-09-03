@@ -354,8 +354,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   $resv_date_array = array();
 
   // Get field_reservation_datetime state & value.
-  // TODO add $entity->type == 'admin' to if below once admin form has multi-date as well.
-  if ($entity->type == 'faculty') {
+  if (($entity->type == 'faculty' || $entity->type == 'admin') && empty($entity->reservation_id)) {
     $multi_res_lang = $form['field_multi_reservation_date_tim']['#language'];
 
     // if multi day options was requested
