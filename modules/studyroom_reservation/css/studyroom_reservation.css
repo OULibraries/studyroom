@@ -30,6 +30,6 @@
 }
 
 /* hide the normal date input field for faculty/admin form only. And hide the multi-date input on the edit form. */
-body.page-reservation-add-faculty div#edit-field-reservation-datetime, body.page-reservation-add-admin div#edit-field-reservation-datetime, body.page-reservation-edit #edit-field-multi-reservation-date-tim {
+body.page-reservation-add-faculty div#edit-field-reservation-datetime, body.page-reservation-add-admin div#edit-field-reservation-datetime, body.page-reservation-edit div#edit-field-multi-reservation-date-tim {
   display: none;
 }
