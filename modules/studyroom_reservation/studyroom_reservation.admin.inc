@@ -609,8 +609,11 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
   $multi_date = false;
   $resv_date_array = array();
   $date = ''; //$date used for redirect
+  // check if this is a reservation edit and set accordingly.
+  $edit_reservation = isset($form_state['studyroom_reservation']->reservation_id) && !empty($form_state['studyroom_reservation']->reservation_id) ? true : false;
 
-  if (isset($values['field_multi_reservation_date_tim'])) {
+  // treat as multi-day if it is new (not and edit) and the multi-day input was submitted.
+  if (isset($values['field_multi_reservation_date_tim']) && $edit_reservation === false) {
     // if multi day options was requested
     if (isset($values['field_multi_reservation_date_tim']['und'][0]['rrule']) && $values['field_multi_reservation_date_tim']['und'][0]['rrule'] !== NULL) {
       $multi_date = true;
