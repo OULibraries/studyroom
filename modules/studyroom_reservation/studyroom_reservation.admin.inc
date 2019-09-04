@@ -612,6 +612,8 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
   // check if this is a reservation edit and set accordingly.
   $edit_reservation = isset($form_state['studyroom_reservation']->reservation_id) && !empty($form_state['studyroom_reservation']->reservation_id) ? true : false;
 
+  $rules_config = rules_config_load('rules_reservation_email');
+
   // treat as multi-day if it is new (not and edit) and the multi-day input was submitted.
   if (isset($values['field_multi_reservation_date_tim']) && $edit_reservation === false) {
     // if multi day options was requested
@@ -625,6 +627,8 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
     if ($multi_date === false) {
       array_pop($resv_date_array);
     }
+
+    $res_count = 0;
 
     foreach ($resv_date_array as $resv_date) {
       // Get start and end time.
@@ -661,9 +665,15 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
       $entity->is_new = 1;
       $entity->reservation_id = NULL;
 
+      if ($res_count > 0) {
+        $rules_config->active = FALSE;
+        $rules_config->save();
+      }
+
       $entity->save();
+      $res_count++;
     }
-  } else { // no multi-date available for reservation tyoe
+  } else { // no multi-date available for reservation type
     $entity = entity_ui_controller('studyroom_reservation')->entityFormSubmitBuildEntity($form, $form_state);
     // Add in created and changed times.
     if ($entity->is_new = isset($entity->is_new) ? $entity->is_new : 0) {
@@ -686,6 +696,9 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
     // Get year/week to redirect to correct week of reservation.
     $date = new DateObject($entity->start_time);
   }
+
+  $rules_config->active = TRUE;
+  $rules_config->save();
 
   $args = explode('/', drupal_get_path_alias());
   $location = $form_state['studyroom']->space->type;
