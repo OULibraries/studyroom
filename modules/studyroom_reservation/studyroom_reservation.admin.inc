@@ -278,7 +278,7 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
       drupal_set_message(t('You cannot try to create a reservation in the past.'));
     }
 
-    // Set default date/time.
+    // Set default date/time for existing date input and multidate input
     $lang = $form['field_reservation_datetime']['#language'];
     $form['field_reservation_datetime'][$lang][0]['#default_value']['value'] = $date_time->format('Y-m-d h:i a');
     $lang_multi = $form['field_multi_reservation_date_tim']['#language'];
@@ -336,7 +336,7 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
 }
 
 /**
- * Form API validate callback for the studyroom_reservation form.
+ * Form API validate callback for the studyroom_reservation form. Same form if you are adding a new one or editing an existing.
  */
 function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   if ($form_state['clicked_button']['#value'] == t('Delete')) {
@@ -350,32 +350,40 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   // Notify field widgets to validate their data.
   field_attach_form_validate('studyroom_reservation', $entity, $form, $form_state);
 
+  // default values for setting multi-date and the reservations array.
   $multi_date = false;
   $resv_date_array = array();
 
-  // Get field_reservation_datetime state & value.
+  // if reservation type is faculty or admin, get reservation date and time from the input with the multi-date option.
+  // Even if the user chooses no repeat, use this same input. It will just be a one index array
+  // Also check if there is a reservation id passed in. If so, treat as a single date and skip any multi-date input.
   if (($entity->type == 'faculty' || $entity->type == 'admin') && empty($entity->reservation_id)) {
+    // gets the variable set in the array so it can be referenced. Usually set to something like 'und'
     $multi_res_lang = $form['field_multi_reservation_date_tim']['#language'];
 
-    // if multi day options was requested
+    // if multi day options were requested, set multi-date to true
     if (isset($values['field_multi_reservation_date_tim'][$multi_res_lang][0]['rrule']) && $values['field_multi_reservation_date_tim'][$multi_res_lang][0]['rrule'] !== NULL) {
       $multi_date = true;
     }
 
+    //set reservation array and timezone.
     $resv_date_array = $values['field_multi_reservation_date_tim'][$multi_res_lang];
     $tz = $form['field_multi_reservation_date_tim'][$multi_res_lang][0]['#date_timezone'];
 
+    // remove last two in the array. They are not related to the dates we need to loop through.
     if ($multi_date === false) {
       array_pop($resv_date_array);
     }
-  } else {
+  } else { // reservation type is  not faculty or admin and will not have multi-dates.
+    // Treat as a traditional reservation and get the value from the older input, but set it as a single index array so it can be processed the same as multi-date.
     $langcode = $form['field_reservation_datetime']['#language'];
     $resv_date_array = $values['field_reservation_datetime'][$langcode];
     $tz = $form['field_reservation_datetime'][$langcode][0]['#date_timezone'];
   }
 
+  // loop through reservation array (could be multiple or single).
   foreach ($resv_date_array as $resv_date) {
-    // Get start and end time.
+    // Get and set start and end time of reservation
     $entity->start_time = new DateObject($resv_date['value'], $tz, 'Y-m-d H:i:s');
     $entity->end_time = clone $entity->start_time;
     $entity->end_time = $entity->end_time->add(new DateInterval('PT' . $values['duration'] . 'S'));
@@ -510,12 +518,20 @@ function check_if_reservation_has_conflict($entity, $start_time) {
  * Check if user has reached the max reservations allowed per day/week
  */
 function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
+  // check if username was posted. This is required to go get the users current reservations.
   if (isset($form_state['values']['user_name'])) {
+    // get array of maxes. This contains the max per day, max per week for the reservation type as well as the count of the current daily and weekly reservations for the user.
+    // Once returned, you can compare and see if any dates are over the max.
     $rule_max_per = $entity->checkRuleMaxResvPer($form_state['values']['user_name'], $resv_date_array);
+
+    // set username to see if it is any special case like gradres, facres, or undres.
     $usernameCheck = $form_state['values']['user_name'];
+
+    // set max variables from $rule_max_per array.
     $max_daily = isset($rule_max_per['max_daily']) && is_int($rule_max_per['max_daily']) ? $rule_max_per['max_daily'] : '';
     $max_weekly = isset($rule_max_per['max_weekly']) && is_int($rule_max_per['max_weekly']) ? $rule_max_per['max_weekly'] : '';
 
+    // if gradres, facres, or undres, do not check for limits
     if ($usernameCheck == 'gradres' || $usernameCheck == 'facres' || $usernameCheck == 'undres') {
       // don't check for limits.
     }
@@ -525,19 +541,21 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
       if ($rule_max_per != 0 && $form_state['studyroom_reservation']->reservation_id == '') {
         // New reservation, no need to check max at this point. Carry on as normal
       }
-      else {
-        // Editing existing reservation. Get reservation's original time and check for maxes
+      else { // Editing existing reservation. Get reservation's original time and check for maxes
         $query = db_select('field_data_field_reservation_datetime', 'f')
           ->fields('f', ['field_reservation_datetime_value'])
           ->condition('f.entity_id', $form_state['studyroom_reservation']->reservation_id)
           ->execute();
         $result = $query->fetchObject();
+        // if a date time was returned from the db for the user.
         if (isset($result->field_reservation_datetime_value)) {
           $orig_date = $result->field_reservation_datetime_value;
           $dateRequested = $resv_date_array[0]["value"];
           $dateRequestedArray = explode(' ', $dateRequested);
           $orig_dateArray = explode(' ', $orig_date);
-          if ($orig_dateArray[0] == $dateRequestedArray[0]) { // same day, add one to limits just in case so user can still save a new time for the day
+
+          // same day, add one to limits just in case so user can still save a new time for the day
+          if ($orig_dateArray[0] == $dateRequestedArray[0]) {
             $max_daily++;
             $max_weekly++;
           }
@@ -564,6 +582,7 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
         }
       }
 
+      // set vars for the original max daily and max weekly. These are used in the error messages below since it is possible the max values were altered if editing a reservation.
       $max_daily_orig = isset($rule_max_per['max_daily']) && is_int($rule_max_per['max_daily']) ? $rule_max_per['max_daily'] : '';
       $max_weekly_orig = isset($rule_max_per['max_weekly']) && is_int($rule_max_per['max_weekly']) ? $rule_max_per['max_weekly'] : '';
 
@@ -600,7 +619,7 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
 }
 
 /**
- * Form API submit callback for the studyroom_reservation form.
+ * Form API submit callback for the studyroom_reservation form. Saves the reservation(s) after submitted.
  *
  * @todo remove hard-coded link
  */
