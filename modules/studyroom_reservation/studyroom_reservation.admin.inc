@@ -624,43 +624,53 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
  * @todo remove hard-coded link
  */
 function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
+  // get posted values from form submission.
   $values = $form_state['values'];
+
+  // set default values for multi-date flag and reservations array
   $multi_date = false;
   $resv_date_array = array();
-  $date = ''; //$date used for redirect
+  $date = ''; //$date used for redirect after submission'
+
   // check if this is a reservation edit and set accordingly.
   $edit_reservation = isset($form_state['studyroom_reservation']->reservation_id) && !empty($form_state['studyroom_reservation']->reservation_id) ? true : false;
 
+  // get config of "rules_reservation_email" rule. will be used later to turn off and on the rule as needed.
   $rules_config = rules_config_load('rules_reservation_email');
 
-  // treat as multi-day if it is new (not and edit) and the multi-day input was submitted.
+  // treat as multi-day if it is new and the multi-day input was submitted. Also cannot be a reservation edit.
   if (isset($values['field_multi_reservation_date_tim']) && $edit_reservation === false) {
     // if multi day options was requested
     if (isset($values['field_multi_reservation_date_tim']['und'][0]['rrule']) && $values['field_multi_reservation_date_tim']['und'][0]['rrule'] !== NULL) {
       $multi_date = true;
     }
 
+    // set up reservations array and timezone.
     $resv_date_array = $values['field_multi_reservation_date_tim']['und'];
     $tz = $form['field_multi_reservation_date_tim']['und'][0]['#date_timezone'];
 
+    // if multi-day, remove last index of array. It isn't a date and not needed in the array.
     if ($multi_date === false) {
       array_pop($resv_date_array);
     }
 
+    // set reservation count to 0. Used in week calculation.
     $res_count = 0;
 
+    // loop through reservations
     foreach ($resv_date_array as $resv_date) {
       // Get start and end time.
       $resv_date_string = $resv_date['value'];
 
-      // $date used for redirect. Set to first date.
+      // $date used for redirect. Set to first date in the array
       if ($date === '') {
         $date = new DateObject($resv_date_string);
       }
 
-      //overwrite main date in form to be the current date in the loop
+      //overwrite main date in form to be the current date in the loop. Used in saving the entity as a single date.
       $form_state['values']['field_reservation_datetime']['und'][0]['value'] = $resv_date_string;
 
+      // load/update entity with submitted values.
       $entity = entity_ui_controller('studyroom_reservation')->entityFormSubmitBuildEntity($form, $form_state);
 
       // Add in created and changed times.
@@ -679,16 +689,20 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
       }
       unset($entity->user_name);
 
+      // set uuid, nid, reservation_id to NUll and is new to 1. This will ensure each entity in this loop is new.
+      // If not done, entity would stay the same and it would only update the same reservation with each date in the loop.
       $entity->uuid->value = NULL;
       $entity->nid->value = NULL;
       $entity->is_new = 1;
       $entity->reservation_id = NULL;
 
+      // for the first reservation, allow the email rule to trigger. For any other dates in the loop, turn off the email trigger.
       if ($res_count > 0) {
         $rules_config->active = FALSE;
         $rules_config->save();
       }
 
+      // Save the entity (reservation)
       $entity->save();
       $res_count++;
     }
@@ -710,15 +724,18 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
     }
     unset($entity->user_name);
 
+    // save the entity (reservation)
     $entity->save();
 
     // Get year/week to redirect to correct week of reservation.
     $date = new DateObject($entity->start_time);
   }
 
+  // set email trigger back to active for normal use.
   $rules_config->active = TRUE;
   $rules_config->save();
 
+  // get url arguments for redirect.
   $args = explode('/', drupal_get_path_alias());
   $location = $form_state['studyroom']->space->type;
   // if this comes from the interactive map page and has the word 'image' in
