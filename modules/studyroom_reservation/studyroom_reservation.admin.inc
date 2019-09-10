@@ -689,16 +689,21 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
       }
       unset($entity->user_name);
 
-      // set uuid, nid, reservation_id to NUll and is new to 1. This will ensure each entity in this loop is new.
-      // If not done, entity would stay the same and it would only update the same reservation with each date in the loop.
-      $entity->uuid->value = NULL;
-      $entity->nid->value = NULL;
-      $entity->is_new = 1;
-      $entity->reservation_id = NULL;
-
       // for the first reservation, allow the email rule to trigger. For any other dates in the loop, turn off the email trigger.
       if ($res_count > 0) {
+        // set uuid, nid, reservation_id to NUll and is new to 1. This will ensure each entity in this loop is new.
+        // If not done, entity would stay the same and it would only update the same reservation with each date in the loop.
+        $entity->uuid->value = NULL;
+        $entity->nid->value = NULL;
+        $entity->is_new = 1;
+        $entity->reservation_id = NULL;
+
+        // set rule to false and save it so an email is not sent
         $rules_config->active = FALSE;
+        $rules_config->save();
+      } else {
+        // set email trigger back to active for normal use.
+        $rules_config->active = TRUE;
         $rules_config->save();
       }
 
@@ -730,10 +735,6 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
     // Get year/week to redirect to correct week of reservation.
     $date = new DateObject($entity->start_time);
   }
-
-  // set email trigger back to active for normal use.
-  $rules_config->active = TRUE;
-  $rules_config->save();
 
   // get url arguments for redirect.
   $args = explode('/', drupal_get_path_alias());
