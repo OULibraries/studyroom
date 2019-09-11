@@ -285,6 +285,24 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     $form['field_multi_reservation_date_tim'][$lang_multi][0]['#default_value']['value'] = $date_time->format('Y-m-d h:i a');
   }
 
+  if ($studyroom_reservation_type->type == 'faculty' || $studyroom_reservation_type->type == 'admin') {
+    $multi_day_location_list = array(21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44);
+
+    // check if space is passed in. If not, check for space input/dropdown and it's value
+    if ($studyroom_space->space_id != NULL) {
+      // location is in the list to allow for repeat reservations and is faculty or admin
+      $space_id_int = intval($studyroom_space->space_id);
+      if (in_array($space_id_int,$multi_day_location_list)) {
+        $form['field_reservation_datetime']['#disabled'] = TRUE;
+        $form['field_reservation_datetime']['#type'] = 'hidden';
+      }
+      else {
+        $form['field_multi_reservation_date_tim']['#disabled'] = TRUE;
+        $form['field_multi_reservation_date_tim']['#type'] = 'hidden';
+      }
+    }
+  }
+
   $form['actions'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('form-actions')),
@@ -298,6 +316,7 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
   if (!empty($form['#submit'])) {
     $submit += $form['#submit'];
   }
+
 
   $form['actions']['submit'] = array(
     '#type' => 'submit',
