@@ -219,13 +219,6 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     );
   }
 
-  $form['duration'] = array(
-    '#type' => 'select',
-    '#title' => t('Duration'),
-    '#options' => drupal_map_assoc($studyroom->durationMinutes(), 'format_interval'),
-    '#default_value' => isset($entity->duration) ? $entity->duration : '3600',
-  );
-
   if (isset($entity->uid)) {
     $user_obj = user_load($entity->uid);
     $name = $user_obj->name;
@@ -299,9 +292,19 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
       else {
         $form['field_multi_reservation_date_tim']['#disabled'] = TRUE;
         $form['field_multi_reservation_date_tim']['#type'] = 'hidden';
+
+        $form['field_all_day[und]']['#disabled'] = TRUE;
+        $form['field_all_day[und]']['#type'] = 'hidden';
       }
     }
   }
+
+  $form['duration'] = array(
+    '#type' => 'select',
+    '#title' => t('Duration'),
+    '#options' => drupal_map_assoc($studyroom->durationMinutes(), 'format_interval'),
+    '#default_value' => isset($entity->duration) ? $entity->duration : '3600',
+  );
 
   $form['actions'] = array(
     '#type' => 'container',
@@ -316,7 +319,6 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
   if (!empty($form['#submit'])) {
     $submit += $form['#submit'];
   }
-
 
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -372,11 +374,23 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   // default values for setting multi-date and the reservations array.
   $multi_date = false;
   $resv_date_array = array();
+  $space_allows_multiday = false;
+  $all_day_reservation = false;
+
+  $multi_day_location_list = array(21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44);
+  $space_id_int = intval($entity->space_id);
+  if (in_array($space_id_int,$multi_day_location_list)) {
+    $space_allows_multiday = true;
+
+    if (isset($values['field_all_day']['und'][0]['value']) && $values['field_all_day']['und'][0]['value'] == 1) {
+      $all_day_reservation = true;
+    }
+  }
 
   // if reservation type is faculty or admin, get reservation date and time from the input with the multi-date option.
   // Even if the user chooses no repeat, use this same input. It will just be a one index array
   // Also check if there is a reservation id passed in. If so, treat as a single date and skip any multi-date input.
-  if (($entity->type == 'faculty' || $entity->type == 'admin') && empty($entity->reservation_id)) {
+  if (($entity->type == 'faculty' || $entity->type == 'admin') && empty($entity->reservation_id) && $space_allows_multiday) {
     // gets the variable set in the array so it can be referenced. Usually set to something like 'und'
     $multi_res_lang = $form['field_multi_reservation_date_tim']['#language'];
 
@@ -400,22 +414,54 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
     $tz = $form['field_reservation_datetime'][$langcode][0]['#date_timezone'];
   }
 
+  $studyroom = $form_state['studyroom'];
+  $today = date_now();
+
   // loop through reservation array (could be multiple or single).
   foreach ($resv_date_array as $resv_date) {
     // Get and set start and end time of reservation
     $entity->start_time = new DateObject($resv_date['value'], $tz, 'Y-m-d H:i:s');
+    $originalStartTime = clone $entity->start_time;
+    $duration = $values['duration'];
+
+    if ($all_day_reservation == true) {
+      if (!isset($studyroom->space)) {
+        $studyroom->space = studyroom_space_load($space_id_int);
+      }
+
+      $space_day_hours = $studyroom->space->hoursPerDate($entity->start_time);
+
+      // if space hours are returned as null/empty, the room is closed.
+      if (empty($space_day_hours['start_time']) || empty($space_day_hours['end_time'])) {
+        $error_msg = 'Your reservation starting at ' . $entity->start_time->format('Y-m-d H:i:s') . ' occurs on a day that this room is not open. Please try again.';
+        form_set_error('', t($error_msg));
+        return;
+      } else {
+        $start_calc = strtotime($space_day_hours['start_time']);
+        $end_calc = strtotime($space_day_hours['end_time']);
+
+        // check if start time is the same day as "today". If so, it's most likely past when the room opens, so we need to keep the original start time as the reservation start time.
+        // if it is not today, then the start time can be the opening time of the room.
+        if ($originalStartTime->format('Y-m-d') == $today->format('Y-m-d')) { //same day
+          $duration = strval($end_calc - $originalStartTime->getTimestamp());
+        } else { // diff day, use opening hr for start time (regardless of what time was requested)
+          $entity->start_time = $space_day_hours['start_time'];
+          $duration = strval($end_calc - $start_calc);
+        }
+      }
+    }
+
     $entity->end_time = clone $entity->start_time;
-    $entity->end_time = $entity->end_time->add(new DateInterval('PT' . $values['duration'] . 'S'));
+    $entity->end_time = $entity->end_time->add(new DateInterval('PT' . $duration . 'S'));
 
     // Check if reservation time is outside space/site hours.
-    $check_if_in_space_open_hours = check_if_date_within_space_open_hours($form_state['studyroom'], $entity->space_id, $entity, $values['duration'], $tz);
+    $check_if_in_space_open_hours = check_if_date_within_space_open_hours($form_state['studyroom'], $entity->space_id, $entity, $duration, $tz);
     if ($check_if_in_space_open_hours !== TRUE) { // if error is returned
       form_set_error('', t($check_if_in_space_open_hours));
       return;
     }
 
     // Check if reservation request before now().
-    $today = date_now();
     $check_if_past = check_if_date_is_past($today, $entity->start_time, $entity->type);
     if ($check_if_past !== TRUE) { // if error is returned
       form_set_error('', t($check_if_past));
@@ -430,7 +476,6 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
     }
 
     // Check if reservation is within the allowed "days out" or "max_days_advance"
-    $studyroom = $form_state['studyroom'];
     $check_if_under_max_days_advance = check_if_date_within_max_days_advance($studyroom, $today, $entity->start_time);
     if ($check_if_under_max_days_advance !== TRUE) { // if error is returned
       form_set_error('', t($check_if_under_max_days_advance));
@@ -657,8 +702,16 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
   // get config of "rules_reservation_email" rule. will be used later to turn off and on the rule as needed.
   $rules_config = rules_config_load('rules_reservation_email');
 
+  $space_allows_multiday = false;
+
+  $multi_day_location_list = array(21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44);
+  $space_id_int = intval($form_state['studyroom']->space->space_id);
+  if (in_array($space_id_int,$multi_day_location_list)) {
+    $space_allows_multiday = true;
+  }
+
   // treat as multi-day if it is new and the multi-day input was submitted. Also cannot be a reservation edit.
-  if (isset($values['field_multi_reservation_date_tim']) && $edit_reservation === false) {
+  if (isset($values['field_multi_reservation_date_tim']) && $edit_reservation === false && $space_allows_multiday) {
     // if multi day options was requested
     if (isset($values['field_multi_reservation_date_tim']['und'][0]['rrule']) && $values['field_multi_reservation_date_tim']['und'][0]['rrule'] !== NULL) {
       $multi_date = true;
