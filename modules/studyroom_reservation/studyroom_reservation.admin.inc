@@ -703,11 +703,16 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
   $rules_config = rules_config_load('rules_reservation_email');
 
   $space_allows_multiday = false;
+  $all_day_reservation = false;
 
   $multi_day_location_list = array(21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44);
   $space_id_int = intval($form_state['studyroom']->space->space_id);
   if (in_array($space_id_int,$multi_day_location_list)) {
     $space_allows_multiday = true;
+  }
+
+  if (isset($values['field_all_day']['und'][0]['value']) && $values['field_all_day']['und'][0]['value'] == 1) {
+    $all_day_reservation = true;
   }
 
   // treat as multi-day if it is new and the multi-day input was submitted. Also cannot be a reservation edit.
@@ -737,6 +742,40 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
       // $date used for redirect. Set to first date in the array
       if ($date === '') {
         $date = new DateObject($resv_date_string);
+      }
+
+      // if reservation is all day, change start time and duration
+      if ($all_day_reservation == true) {
+        $resv_date_object = new DateObject($resv_date_string);
+        $today = date_now();
+
+        $studyroom = new Studyroom();
+        if (!isset($studyroom->space)) {
+          $studyroom->space = studyroom_space_load($space_id_int);
+        }
+
+        $space_day_hours = $studyroom->space->hoursPerDate($resv_date_object);
+
+        // if space hours are returned as null/empty, the room is closed.
+        if (empty($space_day_hours['start_time']) || empty($space_day_hours['end_time'])) {
+          // not sure what to do here, should have already gotten through validation with the same params
+        } else {
+          $start_calc = strtotime($space_day_hours['start_time']);
+          $end_calc = strtotime($space_day_hours['end_time']);
+
+          // check if start time is the same day as "today". If so, it's most likely past when the room opens, so we need to keep the original start time as the reservation start time.
+          // if it is not today, then the start time can be the opening time of the room.
+          if ($resv_date_object->format('Y-m-d') == $today->format('Y-m-d')) { //same day
+            $duration = strval($end_calc - $resv_date_object->getTimestamp());
+          }
+          else { // diff day, use opening hr for start time (regardless of what time was requested)
+            $resv_date_object = $space_day_hours['start_time'];
+            $resv_date_string = $space_day_hours['start_time']->format('Y-m-d H:i:s');
+            $duration = strval($end_calc - $start_calc);
+          }
+
+          $form_state['values']['duration'] = $duration;
+        }
       }
 
       //overwrite main date in form to be the current date in the loop. Used in saving the entity as a single date.
