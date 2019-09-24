@@ -33,3 +33,14 @@
 body.page-reservation-add-faculty div#edit-field-reservation-datetime, body.page-reservation-add-admin div#edit-field-reservation-datetime, body.page-reservation-edit div#edit-field-multi-reservation-date-tim {
   display: none;
 }
+
+#edit-field-multi-reservation-date-tim-und-0-rrule-weekly-interval,
+#edit-field-multi-reservation-date-tim-und-0-rrule-daily-interval-child,
+#edit-field-multi-reservation-date-tim-und-0-rrule-count-child,
+#edit-field-multi-reservation-date-tim-und-0-rrule-monthly-bymonthday-bymonth-child-bymonthday,
+#edit-field-multi-reservation-date-tim-und-0-rrule-count-child,
+#edit-field-multi-reservation-date-tim-und-0-rrule-yearly-interval,
+#edit-field-multi-reservation-date-tim-und-0-rrule-yearly-bymonthday-bymonth-child-bymonthday,
+#edit-field-multi-reservation-date-tim-und-0-rrule-count-child {
+  width: 100px;
+}

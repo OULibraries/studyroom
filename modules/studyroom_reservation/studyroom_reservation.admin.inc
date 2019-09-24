@@ -168,8 +168,7 @@ function studyroom_reservation_delete_form_wrapper($entity) {
 function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = NULL, $date_time = NULL) {
   if (isset($entity->id)) {
     drupal_set_title(t('Reservation %id', array('%id' => $entity->id)));
-  }
-  elseif (!user_access('access reservations overview')) {
+  } elseif (!user_access('access reservations overview')) {
     drupal_set_title(t('Create new reservation'));
   }
 
@@ -255,6 +254,10 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
 
   field_attach_form('studyroom_reservation', $entity, $form, $form_state);
 
+  //set order for date fields
+  $form['field_multi_reservation_date_tim']['#weight'] = -15;
+  $form['field_reservation_datetime']['#weight'] = -16;
+
   // If date passed in, then set default value for datetime field.
   if (isset($date_time)) {
     $date_time = new DateObject($date_time);
@@ -285,7 +288,7 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     if ($studyroom_space->space_id != NULL) {
       // location is in the list to allow for repeat reservations and is faculty or admin
       $space_id_int = intval($studyroom_space->space_id);
-      if (in_array($space_id_int,$multi_day_location_list)) {
+      if (in_array($space_id_int, $multi_day_location_list, true) && empty($entity->reservation_id)) {
         $form['field_reservation_datetime']['#disabled'] = TRUE;
         $form['field_reservation_datetime']['#type'] = 'hidden';
       }
@@ -293,17 +296,31 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
         $form['field_multi_reservation_date_tim']['#disabled'] = TRUE;
         $form['field_multi_reservation_date_tim']['#type'] = 'hidden';
 
-        $form['field_all_day[und]']['#disabled'] = TRUE;
-        $form['field_all_day[und]']['#type'] = 'hidden';
+        if (!in_array($space_id_int, $multi_day_location_list, true)) {
+          $form['field_all_day[und]']['#disabled'] = TRUE;
+          $form['field_all_day[und]']['#type'] = 'hidden';
+          $form['field_all_day']['und']['#disabled'] = TRUE;
+          $form['field_all_day']['und']['#type'] = 'hidden';
+        }
       }
     }
+  } else { // non faculty/admin reservation. Make sure multi date and all day reservation fields are hidden.
+    $form['field_multi_reservation_date_tim']['#disabled'] = TRUE;
+    $form['field_multi_reservation_date_tim']['#type'] = 'hidden';
+    $form['field_all_day[und]']['#disabled'] = TRUE;
+    $form['field_all_day[und]']['#type'] = 'hidden';
+    $form['field_all_day']['und']['#disabled'] = TRUE;
+    $form['field_all_day']['und']['#type'] = 'hidden';
   }
+
+  $form['field_all_day']['#weight'] = -14;
 
   $form['duration'] = array(
     '#type' => 'select',
     '#title' => t('Duration'),
     '#options' => drupal_map_assoc($studyroom->durationMinutes(), 'format_interval'),
     '#default_value' => isset($entity->duration) ? $entity->duration : '3600',
+    '#weight' => -13
   );
 
   $form['actions'] = array(
@@ -716,20 +733,15 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
   }
 
   // treat as multi-day if it is new and the multi-day input was submitted. Also cannot be a reservation edit.
-  if (isset($values['field_multi_reservation_date_tim']) && $edit_reservation === false && $space_allows_multiday) {
+  if (isset($values['field_multi_reservation_date_tim']) && $space_allows_multiday) {
     // if multi day options was requested
     if (isset($values['field_multi_reservation_date_tim']['und'][0]['rrule']) && $values['field_multi_reservation_date_tim']['und'][0]['rrule'] !== NULL) {
       $multi_date = true;
     }
 
-    // set up reservations array and timezone.
-    $resv_date_array = $values['field_multi_reservation_date_tim']['und'];
+    // set up reservations array and timezone. If editing a reservation, use original date time since multi-date is not used.
+    $resv_date_array = $edit_reservation === true ? $values['field_reservation_datetime']['und'] : $values['field_multi_reservation_date_tim']['und'];
     $tz = $form['field_multi_reservation_date_tim']['und'][0]['#date_timezone'];
-
-    // if multi-day, remove last index of array. It isn't a date and not needed in the array.
-    if ($multi_date === false) {
-      array_pop($resv_date_array);
-    }
 
     // set reservation count to 0. Used in week calculation.
     $res_count = 0;

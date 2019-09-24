@@ -33,7 +33,11 @@
   };
 
   jQuery(document).ready(function () {
-    // hide and show duration if all day checkbox is checked or not.
+    // hide and show duration if all day checkbox is checked or not. This one is for the edit page. The click event is for either page when the checkbox is checked or unchecked.
+    if ($('#edit-field-all-day input[type="checkbox"]').prop("checked") == true) {
+      $('.form-item-duration').hide();
+    }
+
     $('#edit-field-all-day input[type="checkbox"]').click(function() {
       if ($(this).prop("checked") == true) {
         $('.form-item-duration').hide();
