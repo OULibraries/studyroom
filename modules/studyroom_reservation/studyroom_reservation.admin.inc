@@ -288,14 +288,17 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     if ($studyroom_space->space_id != NULL) {
       // location is in the list to allow for repeat reservations and is faculty or admin
       $space_id_int = intval($studyroom_space->space_id);
+
+      // hide normal dat time field if room is in the array and the user is not editing a reservation (new only)
       if (in_array($space_id_int, $multi_day_location_list, true) && empty($entity->reservation_id)) {
         $form['field_reservation_datetime']['#disabled'] = TRUE;
         $form['field_reservation_datetime']['#type'] = 'hidden';
       }
-      else {
+      else { // editing reservation or the room is not in the list for multi-day
         $form['field_multi_reservation_date_tim']['#disabled'] = TRUE;
         $form['field_multi_reservation_date_tim']['#type'] = 'hidden';
 
+        // disable all day checkbox if not in allowed list
         if (!in_array($space_id_int, $multi_day_location_list, true)) {
           $form['field_all_day[und]']['#disabled'] = TRUE;
           $form['field_all_day[und]']['#type'] = 'hidden';
@@ -313,6 +316,7 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     $form['field_all_day']['und']['#type'] = 'hidden';
   }
 
+  // set order for all day field
   $form['field_all_day']['#weight'] = -14;
 
   $form['duration'] = array(
@@ -394,11 +398,15 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   $space_allows_multiday = false;
   $all_day_reservation = false;
 
+  // allowed list for all day reservations
   $multi_day_location_list = array(21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44);
   $space_id_int = intval($entity->space_id);
+
+  // if in array, set $space_allows_multiday var to true
   if (in_array($space_id_int,$multi_day_location_list)) {
     $space_allows_multiday = true;
 
+    // if all day, set var to true.
     if (isset($values['field_all_day']['und'][0]['value']) && $values['field_all_day']['und'][0]['value'] == 1) {
       $all_day_reservation = true;
     }
@@ -424,7 +432,8 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
     if ($multi_date === false) {
       array_pop($resv_date_array);
     }
-  } else { // reservation type is  not faculty or admin and will not have multi-dates.
+  } else {
+    // reservation type is  not faculty or admin and will not have multi-dates.
     // Treat as a traditional reservation and get the value from the older input, but set it as a single index array so it can be processed the same as multi-date.
     $langcode = $form['field_reservation_datetime']['#language'];
     $resv_date_array = $values['field_reservation_datetime'][$langcode];
@@ -454,6 +463,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
         form_set_error('', t($error_msg));
         return;
       } else {
+        // get open and closing hrs of room
         $start_calc = strtotime($space_day_hours['start_time']);
         $end_calc = strtotime($space_day_hours['end_time']);
 
@@ -468,6 +478,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
       }
     }
 
+    // set end time based on new duration (can be all day or as it was requested.
     $entity->end_time = clone $entity->start_time;
     $entity->end_time = $entity->end_time->add(new DateInterval('PT' . $duration . 'S'));
 
@@ -719,15 +730,18 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
   // get config of "rules_reservation_email" rule. will be used later to turn off and on the rule as needed.
   $rules_config = rules_config_load('rules_reservation_email');
 
+  // set defaults for multi-day and all day.
   $space_allows_multiday = false;
   $all_day_reservation = false;
 
+  // set up allowed list for multi-day/all day
   $multi_day_location_list = array(21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44);
   $space_id_int = intval($form_state['studyroom']->space->space_id);
   if (in_array($space_id_int,$multi_day_location_list)) {
     $space_allows_multiday = true;
   }
 
+  // set all day to true if it was set in the form
   if (isset($values['field_all_day']['und'][0]['value']) && $values['field_all_day']['und'][0]['value'] == 1) {
     $all_day_reservation = true;
   }

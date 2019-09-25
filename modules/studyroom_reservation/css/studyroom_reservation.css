@@ -44,3 +44,27 @@ body.page-reservation-add-faculty div#edit-field-reservation-datetime, body.page
 #edit-field-multi-reservation-date-tim-und-0-rrule-count-child {
   width: 100px;
 }
+
+#repeat-settings-fieldset .control-label {
+  margin-top: 10px;
+  margin-bottom: 0px;
+}
+
+#repeat-settings-fieldset .monthly .form-checkbox {
+  margin-right: 5px;
+}
+
+.form-item-field-multi-reservation-date-tim-und-0-rrule-monthly-byday-bymonth-child-byday-count select,
+.form-item-field-multi-reservation-date-tim-und-0-rrule-monthly-byday-bymonth-child-byday-day select {
+  float: none;
+  width: 100px;
+}
+
+.form-item-field-multi-reservation-date-tim-und-0-rrule-monthly-bymonthday-bymonth-child-bymonthday,
+.form-item-field-multi-reservation-date-tim-und-0-rrule-monthly-byday-bymonth-child-byday-count {
+  margin-top: 10px;
+}
+
+.form-item-field-multi-reservation-date-tim-und-0-rrule-monthly-byday-bymonth-child-byday-day {
+  margin-top: 11px;
+}
