@@ -176,11 +176,9 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
   $studyroom_reservation_type = studyroom_reservation_type_load($type);
   if (isset($space) && is_numeric($space)) {
     $studyroom_space = studyroom_space_load($space);
-  }
-  elseif (isset($entity->space_id)) {
+  } elseif (isset($entity->space_id)) {
     $studyroom_space = studyroom_space_load($entity->space_id);
-  }
-  else {
+  } else {
     $studyroom_space = NULL;
   }
 
@@ -221,8 +219,7 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
   if (isset($entity->uid)) {
     $user_obj = user_load($entity->uid);
     $name = $user_obj->name;
-  }
-  else {
+  } else {
     // If no uid set, use current user.
     $name = $GLOBALS['user']->name;
   }
@@ -239,8 +236,7 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
       '#access' => user_access("access user profiles"),
       // Need "View user profiles" to use this.
     );
-  }
-  else {
+  } else {
     $form['user_name'] = array(
       '#type' => 'hidden',
       '#value' => $name,
@@ -277,11 +273,12 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     // Set default date/time for existing date input and multidate input
     $lang = $form['field_reservation_datetime']['#language'];
     $form['field_reservation_datetime'][$lang][0]['#default_value']['value'] = $date_time->format('Y-m-d h:i a');
-    $lang_multi = $form['field_multi_reservation_date_tim']['#language'];
-    $form['field_multi_reservation_date_tim'][$lang_multi][0]['#default_value']['value'] = $date_time->format('Y-m-d h:i a');
   }
 
   if ($studyroom_reservation_type->type == 'faculty' || $studyroom_reservation_type->type == 'admin') {
+    $lang_multi = $form['field_multi_reservation_date_tim']['#language'];
+    $form['field_multi_reservation_date_tim'][$lang_multi][0]['#default_value']['value'] = $date_time->format('Y-m-d h:i a');
+
     $multi_day_location_list = array(21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44);
 
     // check if space is passed in. If not, check for space input/dropdown and it's value
@@ -293,8 +290,7 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
       if (in_array($space_id_int, $multi_day_location_list, true) && empty($entity->reservation_id)) {
         $form['field_reservation_datetime']['#disabled'] = TRUE;
         $form['field_reservation_datetime']['#type'] = 'hidden';
-      }
-      else { // editing reservation or the room is not in the list for multi-day
+      } else { // editing reservation or the room is not in the list for multi-day
         $form['field_multi_reservation_date_tim']['#disabled'] = TRUE;
         $form['field_multi_reservation_date_tim']['#type'] = 'hidden';
 
@@ -350,8 +346,7 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
   $delete_button = TRUE;
   if ($entity->isLocked()) {
     $delete_button = FALSE;
-  }
-  elseif (isset($entity->is_new)) {
+  } elseif (isset($entity->is_new)) {
     $delete_button = !$entity->is_new;
   }
 
@@ -746,8 +741,10 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
     $all_day_reservation = true;
   }
 
-  // treat as multi-day if it is new and the multi-day input was submitted. Also cannot be a reservation edit.
-  if (isset($values['field_multi_reservation_date_tim']) && $space_allows_multiday) {
+  $reservation_type = $form['#entity']->type;
+
+  // treat as multi-day if it is new (non-edit), faculty or admin, and the space allows multi-day
+  if (isset($values['field_multi_reservation_date_tim']) && $space_allows_multiday && ($reservation_type == 'faculty' || $reservation_type == 'admin')) {
     // if multi day options was requested
     if (isset($values['field_multi_reservation_date_tim']['und'][0]['rrule']) && $values['field_multi_reservation_date_tim']['und'][0]['rrule'] !== NULL) {
       $multi_date = true;
@@ -756,6 +753,11 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
     // set up reservations array and timezone. If editing a reservation, use original date time since multi-date is not used.
     $resv_date_array = $edit_reservation === true ? $values['field_reservation_datetime']['und'] : $values['field_multi_reservation_date_tim']['und'];
     $tz = $form['field_multi_reservation_date_tim']['und'][0]['#date_timezone'];
+
+    //get rid of extra index if it is there
+    if (isset($resv_date_array['add_more'])) {
+      array_pop($resv_date_array);
+    }
 
     // set reservation count to 0. Used in week calculation.
     $res_count = 0;
@@ -806,6 +808,9 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
 
       //overwrite main date in form to be the current date in the loop. Used in saving the entity as a single date.
       $form_state['values']['field_reservation_datetime']['und'][0]['value'] = $resv_date_string;
+
+      //overwrite the date in the array with the correct start time used (if all day was checked). This is used in the email text.
+      $form_state['values']['field_multi_reservation_date_tim']['und'][$res_count]['value'] = $resv_date_string;
 
       // load/update entity with submitted values.
       $entity = entity_ui_controller('studyroom_reservation')->entityFormSubmitBuildEntity($form, $form_state);

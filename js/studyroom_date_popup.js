@@ -60,10 +60,13 @@
         if (multi_day_location_list.includes(space_id)) {
           $('div.field-name-field-multi-reservation-date-tim').show();
           $('div.field-name-field-reservation-datetime').hide();
+          $('#edit-field-all-day').show();
         }
         else {
           $('div.field-name-field-multi-reservation-date-tim').hide();
           $('div.field-name-field-reservation-datetime').show();
+          $('#edit-field-all-day').hide();
+          $('#edit-field-all-day input[type="checkbox"]').prop("checked", false);
         }
 
         $('#edit-space-id').on('change', function () {
@@ -71,14 +74,19 @@
           if (multi_day_location_list.includes(space_id)) {
             $('div.field-name-field-multi-reservation-date-tim').show();
             $('div.field-name-field-reservation-datetime').hide();
+            $('#edit-field-all-day').show();
           } else {
             $('div.field-name-field-multi-reservation-date-tim').hide();
             $('div.field-name-field-reservation-datetime').show();
+            $('#edit-field-all-day').hide();
+            $('#edit-field-all-day input[type="checkbox"]').prop("checked", false);
           }
         });
       } else {
         $('div.field-name-field-multi-reservation-date-tim').hide();
         $('div.field-name-field-reservation-datetime').show();
+        $('#edit-field-all-day').hide();
+        $('#edit-field-all-day input[type="checkbox"]').prop("checked", false);
       }
     }
   });
