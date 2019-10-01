@@ -477,17 +477,17 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
     $entity->end_time = clone $entity->start_time;
     $entity->end_time = $entity->end_time->add(new DateInterval('PT' . $duration . 'S'));
 
-    // Check if reservation time is outside space/site hours.
-    $check_if_in_space_open_hours = check_if_date_within_space_open_hours($form_state['studyroom'], $entity->space_id, $entity, $duration, $tz);
-    if ($check_if_in_space_open_hours !== TRUE) { // if error is returned
-      form_set_error('', t($check_if_in_space_open_hours));
-      return;
-    }
-
     // Check if reservation request before now().
     $check_if_past = check_if_date_is_past($today, $entity->start_time, $entity->type);
     if ($check_if_past !== TRUE) { // if error is returned
       form_set_error('', t($check_if_past));
+      return;
+    }
+
+    // Check if reservation time is outside space/site hours.
+    $check_if_in_space_open_hours = check_if_date_within_space_open_hours($form_state['studyroom'], $entity->space_id, $entity, $duration, $tz);
+    if ($check_if_in_space_open_hours !== TRUE) { // if error is returned
+      form_set_error('', t($check_if_in_space_open_hours));
       return;
     }
 
@@ -526,7 +526,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
  */
 function check_if_date_is_past($today, $start_time, $type) {
   $interval = $today->difference($start_time, 'minutes', FALSE);
-  if ($interval < 0 || !user_access("edit any ".$type." studyroom_reservation")) {
+  if ($interval < 0) {
     return 'Your reservation at '.str_replace(' America/Chicago', '', $start_time).' is in the past. Please select a date/time in the future.';
   } else {
     return true;
