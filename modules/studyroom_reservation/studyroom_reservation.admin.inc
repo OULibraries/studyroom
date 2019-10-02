@@ -485,7 +485,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
     }
 
     // Check if reservation time is outside space/site hours.
-    $check_if_in_space_open_hours = check_if_date_within_space_open_hours($form_state['studyroom'], $entity->space_id, $entity, $duration, $tz);
+    $check_if_in_space_open_hours = check_if_date_within_space_open_hours($studyroom, $entity->space_id, $entity, $duration, $tz);
     if ($check_if_in_space_open_hours !== TRUE) { // if error is returned
       form_set_error('', t($check_if_in_space_open_hours));
       return;
@@ -562,7 +562,7 @@ function check_if_date_within_max_days_advance($studyroom, $today, $start_time) 
  * Check if requested date is within the space's available open hours
  */
 function check_if_date_within_space_open_hours($studyroom, $space_id, $entity, $duration, $tz) {
-  if (!isset($studyroom->space)) {
+  if (!isset($studyroom->space) || !$studyroom->space) {
     $studyroom->space = studyroom_space_load($space_id);
   }
 
