@@ -262,7 +262,7 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     if ($day_diff > $studyroom->max_days_advance) {
       $date_time = $today->add(new DateInterval('P' . $studyroom->max_days_advance . 'D'));
       // @todo Better message
-      drupal_set_message(t('The date trying to be used is to far in the future.'));
+      drupal_set_message(t('The date trying to be used is too far in the future.'));
     }
 
     if ($today->difference($date_time, 'minutes', FALSE) < 0) {
@@ -854,6 +854,9 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
       $res_count++;
     }
   } else { // no multi-date available for reservation type
+    // take out the multi-date field. It is not used in single day submissions.
+    unset($form_state['values']['field_multi_reservation_date_tim']);
+
     $entity = entity_ui_controller('studyroom_reservation')->entityFormSubmitBuildEntity($form, $form_state);
     // Add in created and changed times.
     if ($entity->is_new = isset($entity->is_new) ? $entity->is_new : 0) {
@@ -865,10 +868,10 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
     $account = user_load_by_name($entity->user_name);
     if ($account) {
       $entity->uid = $account->uid;
-    }
-    else {
+    } else {
       $entity->uid = 0;
     }
+
     unset($entity->user_name);
 
     // save the entity (reservation)
