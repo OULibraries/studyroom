@@ -881,6 +881,10 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
     $date = new DateObject($entity->start_time);
   }
 
+  // reactivate rule just in case it was left as false.
+  $rules_config->active = TRUE;
+  $rules_config->save();
+
   // get url arguments for redirect.
   $args = explode('/', drupal_get_path_alias());
   $location = $form_state['studyroom']->space->type;
