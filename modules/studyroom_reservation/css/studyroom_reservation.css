@@ -68,3 +68,11 @@ body.page-reservation-add-faculty div#edit-field-reservation-datetime, body.page
 .form-item-field-multi-reservation-date-tim-und-0-rrule-monthly-byday-bymonth-child-byday-day {
   margin-top: 11px;
 }
+
+.until,
+.weekly,
+.form-item-field-multi-reservation-date-tim-und-0-rrule-show-additions,
+.form-item-field-multi-reservation-date-tim-und-0-rrule-weekly-interval,
+.form-item-field-multi-reservation-date-tim-und-0-rrule-weekly-byday {
+  display: none;
+}

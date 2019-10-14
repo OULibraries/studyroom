@@ -279,7 +279,7 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     $lang_multi = $form['field_multi_reservation_date_tim']['#language'];
     $form['field_multi_reservation_date_tim'][$lang_multi][0]['#default_value']['value'] = $date_time->format('Y-m-d h:i a');
 
-    $multi_day_location_list = array(21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44);
+    $multi_day_location_list = array(22,24,37,38,39,40,41,44);
 
     // check if space is passed in. If not, check for space input/dropdown and it's value
     if ($studyroom_space->space_id != NULL) {
@@ -394,7 +394,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   $all_day_reservation = false;
 
   // allowed list for all day reservations
-  $multi_day_location_list = array(21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44);
+  $multi_day_location_list = array(22,24,37,38,39,40,41,44);
   $space_id_int = intval($entity->space_id);
 
   // if in array, set $space_allows_multiday var to true
@@ -730,7 +730,7 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
   $all_day_reservation = false;
 
   // set up allowed list for multi-day/all day
-  $multi_day_location_list = array(21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44);
+  $multi_day_location_list = array(22,24,37,38,39,40,41,44);
   $space_id_int = intval($form_state['studyroom']->space->space_id);
   if (in_array($space_id_int,$multi_day_location_list)) {
     $space_allows_multiday = true;
