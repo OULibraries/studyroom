@@ -279,23 +279,23 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     $lang_multi = $form['field_multi_reservation_date_tim']['#language'];
     $form['field_multi_reservation_date_tim'][$lang_multi][0]['#default_value']['value'] = $date_time->format('Y-m-d h:i a');
 
-    $multi_day_location_list = array(22,24,37,38,39,40,41,44);
+    $multi_day_location_list = get_long_term_faculty_focus_rooms();
 
     // check if space is passed in. If not, check for space input/dropdown and it's value
     if ($studyroom_space->space_id != NULL) {
       // location is in the list to allow for repeat reservations and is faculty or admin
-      $space_id_int = intval($studyroom_space->space_id);
+      $space_id_string = $studyroom_space->space_id;
 
       // hide normal dat time field if room is in the array and the user is not editing a reservation (new only)
-      if (in_array($space_id_int, $multi_day_location_list, true) && empty($entity->reservation_id)) {
-        $form['field_reservation_datetime']['#disabled'] = TRUE;
-        $form['field_reservation_datetime']['#type'] = 'hidden';
+      if (in_array($space_id_string, $multi_day_location_list, true) && empty($entity->reservation_id)) {
+//        $form['field_reservation_datetime']['#disabled'] = TRUE;
+//        $form['field_reservation_datetime']['#type'] = 'hidden';
       } else { // editing reservation or the room is not in the list for multi-day
-        $form['field_multi_reservation_date_tim']['#disabled'] = TRUE;
-        $form['field_multi_reservation_date_tim']['#type'] = 'hidden';
+//        $form['field_multi_reservation_date_tim']['#disabled'] = TRUE;
+//        $form['field_multi_reservation_date_tim']['#type'] = 'hidden';
 
         // disable all day checkbox if not in allowed list
-        if (!in_array($space_id_int, $multi_day_location_list, true)) {
+        if (!in_array($space_id_string, $multi_day_location_list, true)) {
           $form['field_all_day[und]']['#disabled'] = TRUE;
           $form['field_all_day[und]']['#type'] = 'hidden';
           $form['field_all_day']['und']['#disabled'] = TRUE;
@@ -304,8 +304,8 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
       }
     }
   } else { // non faculty/admin reservation. Make sure multi date and all day reservation fields are hidden.
-    $form['field_multi_reservation_date_tim']['#disabled'] = TRUE;
-    $form['field_multi_reservation_date_tim']['#type'] = 'hidden';
+//    $form['field_multi_reservation_date_tim']['#disabled'] = TRUE;
+//    $form['field_multi_reservation_date_tim']['#type'] = 'hidden';
     $form['field_all_day[und]']['#disabled'] = TRUE;
     $form['field_all_day[und]']['#type'] = 'hidden';
     $form['field_all_day']['und']['#disabled'] = TRUE;
@@ -394,11 +394,11 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   $all_day_reservation = false;
 
   // allowed list for all day reservations
-  $multi_day_location_list = array(22,24,37,38,39,40,41,44);
-  $space_id_int = intval($entity->space_id);
+  $multi_day_location_list = get_long_term_faculty_focus_rooms();
+  $space_id_string = $entity->space_id;
 
   // if in array, set $space_allows_multiday var to true
-  if (in_array($space_id_int,$multi_day_location_list)) {
+  if (in_array($space_id_string,$multi_day_location_list)) {
     $space_allows_multiday = true;
 
     // if all day, set var to true.
@@ -447,6 +447,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
 
     if ($all_day_reservation == true) {
       if (!isset($studyroom->space)) {
+        $space_id_int = intval($space_id_string);
         $studyroom->space = studyroom_space_load($space_id_int);
       }
 
@@ -706,6 +707,26 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
 }
 
 /**
+ * Call to get space id's from that are long term faculty focus rooms
+ *
+ */
+function get_long_term_faculty_focus_rooms() {
+  $space_id_array = array();
+
+  $query = db_select('studyroom_space', 's')
+    ->fields('s', ['space_id'])
+    ->condition('s.type', 'bizzell_faculty_longterm_focus_r')
+    ->execute()
+    ->fetchAll();
+
+  foreach ($query as $space) {
+    array_push($space_id_array, $space->space_id);
+  }
+
+  return $space_id_array;
+}
+
+/**
  * Form API submit callback for the studyroom_reservation form. Saves the reservation(s) after submitted.
  *
  * @todo remove hard-coded link
@@ -730,9 +751,9 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
   $all_day_reservation = false;
 
   // set up allowed list for multi-day/all day
-  $multi_day_location_list = array(22,24,37,38,39,40,41,44);
-  $space_id_int = intval($form_state['studyroom']->space->space_id);
-  if (in_array($space_id_int,$multi_day_location_list)) {
+  $multi_day_location_list = get_long_term_faculty_focus_rooms();
+  $space_id_string = $form_state['studyroom']->space->space_id;
+  if (in_array($space_id_string, $multi_day_location_list)) {
     $space_allows_multiday = true;
   }
 
@@ -779,6 +800,7 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
 
         $studyroom = new Studyroom();
         if (!isset($studyroom->space)) {
+          $space_id_int = intval($space_id_string);
           $studyroom->space = studyroom_space_load($space_id_int);
         }
 

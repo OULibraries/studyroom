@@ -58,14 +58,13 @@
     });
 
     if ($('#edit-space-id').val()) {
-      var multi_day_location_list = [22,24,37,38,39,40,41,44];
-
       var is_faculty_or_admin = $('body').hasClass('page-reservation-add-admin') || $('body').hasClass('page-reservation-add-faculty') ? 1 : 0;
 
       if (is_faculty_or_admin === 1) {
-        var space_id = parseInt($('#edit-space-id').val());
+        var space_name = $('#edit-space-id option:selected').text();
+        var is_longterm_room = space_name.includes('Longterm');
 
-        if (multi_day_location_list.includes(space_id)) {
+        if (is_longterm_room) {
           $('div.field-name-field-multi-reservation-date-tim').show();
           $('div.field-name-field-reservation-datetime').hide();
           $('#edit-field-all-day').show();
@@ -78,8 +77,10 @@
         }
 
         $('#edit-space-id').on('change', function () {
-          space_id = parseInt($('#edit-space-id').val());
-          if (multi_day_location_list.includes(space_id)) {
+          var space_name = $('#edit-space-id option:selected').text();
+          var is_longterm_room = space_name.includes('Longterm');
+
+          if (is_longterm_room) {
             $('div.field-name-field-multi-reservation-date-tim').show();
             $('div.field-name-field-reservation-datetime').hide();
             $('#edit-field-all-day').show();
