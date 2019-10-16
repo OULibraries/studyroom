@@ -73,6 +73,7 @@ body.page-reservation-add-faculty div#edit-field-reservation-datetime, body.page
 .weekly,
 .form-item-field-multi-reservation-date-tim-und-0-rrule-show-additions,
 .form-item-field-multi-reservation-date-tim-und-0-rrule-weekly-interval,
-.form-item-field-multi-reservation-date-tim-und-0-rrule-weekly-byday {
-  display: none;
+.form-item-field-multi-reservation-date-tim-und-0-rrule-weekly-byday,
+.form-item-field-multi-reservation-date-tim-und-0-rrule-daily-byday-radios {
+  display: none !important;
 }

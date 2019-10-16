@@ -285,27 +285,15 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     if ($studyroom_space->space_id != NULL) {
       // location is in the list to allow for repeat reservations and is faculty or admin
       $space_id_string = $studyroom_space->space_id;
-
-      // hide normal dat time field if room is in the array and the user is not editing a reservation (new only)
-      if (in_array($space_id_string, $multi_day_location_list, true) && empty($entity->reservation_id)) {
-//        $form['field_reservation_datetime']['#disabled'] = TRUE;
-//        $form['field_reservation_datetime']['#type'] = 'hidden';
-      } else { // editing reservation or the room is not in the list for multi-day
-//        $form['field_multi_reservation_date_tim']['#disabled'] = TRUE;
-//        $form['field_multi_reservation_date_tim']['#type'] = 'hidden';
-
-        // disable all day checkbox if not in allowed list
-        if (!in_array($space_id_string, $multi_day_location_list, true)) {
-          $form['field_all_day[und]']['#disabled'] = TRUE;
-          $form['field_all_day[und]']['#type'] = 'hidden';
-          $form['field_all_day']['und']['#disabled'] = TRUE;
-          $form['field_all_day']['und']['#type'] = 'hidden';
-        }
+      // if editing reservation or the room is not in the list for multi-day, disable all day checkbox if not in allowed list
+      if ($entity->reservation_id != "" || !in_array($space_id_string, $multi_day_location_list, TRUE)) {
+        $form['field_all_day[und]']['#disabled'] = TRUE;
+        $form['field_all_day[und]']['#type'] = 'hidden';
+        $form['field_all_day']['und']['#disabled'] = TRUE;
+        $form['field_all_day']['und']['#type'] = 'hidden';
       }
     }
-  } else { // non faculty/admin reservation. Make sure multi date and all day reservation fields are hidden.
-//    $form['field_multi_reservation_date_tim']['#disabled'] = TRUE;
-//    $form['field_multi_reservation_date_tim']['#type'] = 'hidden';
+  } else { // non faculty/admin reservation. Make sure all day reservation field is hidden.
     $form['field_all_day[und]']['#disabled'] = TRUE;
     $form['field_all_day[und]']['#type'] = 'hidden';
     $form['field_all_day']['und']['#disabled'] = TRUE;
@@ -398,7 +386,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   $space_id_string = $entity->space_id;
 
   // if in array, set $space_allows_multiday var to true
-  if (in_array($space_id_string,$multi_day_location_list)) {
+  if (in_array($space_id_string, $multi_day_location_list)) {
     $space_allows_multiday = true;
 
     // if all day, set var to true.
@@ -519,6 +507,15 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   if ($check_if_max_reached !== TRUE) { //if error is returned
     form_set_error('', t($check_if_max_reached));
     return;
+  }
+
+  // If it is a "key" room, check if user has hit the "banked reservations" limit of 7 for this room type
+  if ($space_allows_multiday) {
+    $check_banked_limit = check_banked_limit($form_state, $entity, count($resv_date_array));
+    if ($check_banked_limit !== TRUE) { //if error is returned
+      form_set_error('', t($check_banked_limit));
+      return;
+    }
   }
 }
 
@@ -699,6 +696,68 @@ function check_if_user_max_reached($form_state, $entity, $resv_date_array) {
             return 'In regards to your reservation at '.$local_datetime.', you have reached the weekly reservation limit of ' . $weekly_count . ' for that specific week. To request additional reservations, please email <a href="mailto:libpr@ou.edu">libpr@ou.edu</a>.';
           }
         }
+      }
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Check user's banked limit for room type requested. Limit 7 per location type
+ */
+function check_banked_limit($form_state, $entity, $reservations_requested) {
+  // check if username was posted. This is required to go get the users current reservations.
+  if (isset($form_state['values']['user_name'])) {
+    // set user name
+    $user_name = $form_state['values']['user_name'];
+
+    // if gradres, facres, or undres, do not check for limits
+    if ($user_name == 'gradres' || $user_name == 'facres' || $user_name == 'undres') {
+      return true;
+    }
+
+    // get reservation type
+    $type = $entity->type;
+
+    // don't check for max values if type is "public" or "UI"
+    if ($type->public || $type->ui) {
+      return true;
+    }
+
+    // Load user info
+    $account = user_load_by_name($user_name);
+    $uid = $account->uid;
+
+    // Load space info
+    $space = studyroom_space_load($entity->space_id);
+    $spaces = studyroom_space_get_spaces_by_type($space->type);
+    $space_ids = array_keys($spaces);
+    $first_day = date('Y-m-d H:i:s');
+    $last_date_calc = strtotime("+7 day");
+    $last_day = date('Y-m-d H:i:s', $last_date_calc);
+    // get user's reservations from right now + 7 days within the same location type
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'studyroom_reservation')
+      ->propertyCondition('type', $type)
+      ->propertyCondition('space_id', $space_ids, 'IN')
+      ->propertyCondition('uid', $uid)
+      ->fieldCondition('field_reservation_datetime', 'value', array($first_day, $last_day), 'BETWEEN')
+      ->fieldOrderBy('field_reservation_datetime', 'value', 'ASC');
+    $results = $query->execute();
+    $resvs = [];
+    if (isset($results['studyroom_reservation'])) {
+      $resvs = array_keys($results['studyroom_reservation']);
+      $bankCount = count($resvs);
+      $reservation_text = $bankCount > 1 ? 'reservations' : 'reservation';
+
+      // add in requested reservations with reservations the user has over the next 7 days
+      $new_count_with_reservations = $bankCount + $reservations_requested;
+      $reservations_requested_text = $reservations_requested > 1 ? 'reservations' : 'reservation';
+
+      // if over 7 for the next 7 days, block user from reservation.
+      if ($new_count_with_reservations > 7) {
+        return 'With this request, you are exceeding the allowed 7 banked reservations within the next 7 days. You requested '.$reservations_requested.' '.$reservations_requested_text.' and  you currently have '.$bankCount.' '.$reservation_text.'.';
       }
     }
   }
