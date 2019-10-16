@@ -731,7 +731,7 @@ function check_banked_limit($form_state, $entity, $reservations_requested) {
     $space = studyroom_space_load($entity->space_id);
     $spaces = studyroom_space_get_spaces_by_type($space->type);
     $space_ids = array_keys($spaces);
-    $first_day = date('Y-m-d H:i:s');
+    $first_day = date('Y-m-d 00:00:00');
     $last_date_calc = strtotime("+7 day");
     $last_day = date('Y-m-d 23:59:59', $last_date_calc);
     // get user's reservations from right now + 7 days within the same location type
