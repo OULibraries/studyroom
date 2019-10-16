@@ -509,13 +509,11 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
     return;
   }
 
-  // If it is a "key" room, check if user has hit the "banked reservations" limit of 7 for this room type
-  if ($space_allows_multiday) {
-    $check_banked_limit = check_banked_limit($form_state, $entity, count($resv_date_array));
-    if ($check_banked_limit !== TRUE) { //if error is returned
-      form_set_error('', t($check_banked_limit));
-      return;
-    }
+  // Check if user has hit the "banked reservations" limit of 7 for this room type
+  $check_banked_limit = check_banked_limit($form_state, $entity, count($resv_date_array));
+  if ($check_banked_limit !== TRUE) { //if error is returned
+    form_set_error('', t($check_banked_limit));
+    return;
   }
 }
 
@@ -735,7 +733,7 @@ function check_banked_limit($form_state, $entity, $reservations_requested) {
     $space_ids = array_keys($spaces);
     $first_day = date('Y-m-d H:i:s');
     $last_date_calc = strtotime("+7 day");
-    $last_day = date('Y-m-d H:i:s', $last_date_calc);
+    $last_day = date('Y-m-d 23:59:59', $last_date_calc);
     // get user's reservations from right now + 7 days within the same location type
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'studyroom_reservation')
