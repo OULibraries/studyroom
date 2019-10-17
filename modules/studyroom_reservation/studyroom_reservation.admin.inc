@@ -254,6 +254,11 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
   $form['field_multi_reservation_date_tim']['#weight'] = -15;
   $form['field_reservation_datetime']['#weight'] = -16;
 
+  // set date when editing reservation just in case.
+  if (!isset($date_time) && isset($entity->field_reservation_datetime['und'][0]['value'])) {
+    $date_time = $entity->field_reservation_datetime['und'][0]['value'];
+  }
+
   // If date passed in, then set default value for datetime field.
   if (isset($date_time)) {
     $date_time = new DateObject($date_time);
@@ -509,11 +514,13 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
     return;
   }
 
-  // Check if user has hit the "banked reservations" limit of 7 for this room type
-  $check_banked_limit = check_banked_limit($form_state, $entity, count($resv_date_array));
-  if ($check_banked_limit !== TRUE) { //if error is returned
-    form_set_error('', t($check_banked_limit));
-    return;
+  // if new reservation check if user has hit the "banked reservations" limit of 7 for this room type
+  if (empty($entity->reservation_id)) {
+    $check_banked_limit = check_banked_limit($form_state, $entity, count($resv_date_array));
+    if ($check_banked_limit !== TRUE) { //if error is returned
+      form_set_error('', t($check_banked_limit));
+      return;
+    }
   }
 }
 
@@ -732,15 +739,14 @@ function check_banked_limit($form_state, $entity, $reservations_requested) {
     $spaces = studyroom_space_get_spaces_by_type($space->type);
     $space_ids = array_keys($spaces);
     $first_day = date('Y-m-d 00:00:00');
-    $last_date_calc = strtotime("+7 day");
-    $last_day = date('Y-m-d 23:59:59', $last_date_calc);
-    // get user's reservations from right now + 7 days within the same location type
+
+    // get user's reservations from right now into the future and under the same location type
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'studyroom_reservation')
       ->propertyCondition('type', $type)
       ->propertyCondition('space_id', $space_ids, 'IN')
       ->propertyCondition('uid', $uid)
-      ->fieldCondition('field_reservation_datetime', 'value', array($first_day, $last_day), 'BETWEEN')
+      ->fieldCondition('field_reservation_datetime', 'value', $first_day, '>')
       ->fieldOrderBy('field_reservation_datetime', 'value', 'ASC');
     $results = $query->execute();
     $resvs = [];
@@ -753,7 +759,7 @@ function check_banked_limit($form_state, $entity, $reservations_requested) {
       $new_count_with_reservations = $bankCount + $reservations_requested;
       $reservations_requested_text = $reservations_requested > 1 ? 'reservations' : 'reservation';
 
-      // if over 7 for the next 7 days, block user from reservation.
+      // if user has over 7 future reservations, block user from any new reservations
       if ($new_count_with_reservations > 7) {
         return 'With this request, you are exceeding the allowed 7 future reservations. You requested '.$reservations_requested.' '.$reservations_requested_text.', and you currently have '.$bankCount.' '.$reservation_text.'. Please, remove a reservation, wait until one passes, or choose a different room type.';
       }
