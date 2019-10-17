@@ -761,7 +761,7 @@ function check_banked_limit($form_state, $entity, $reservations_requested) {
 
       // if user has over 7 future reservations, block user from any new reservations
       if ($new_count_with_reservations > 7) {
-        return 'With this request, you are exceeding the allowed 7 future reservations. You requested '.$reservations_requested.' '.$reservations_requested_text.', and you currently have '.$bankCount.' '.$reservation_text.'. Please, remove a reservation, wait until one passes, or choose a different room type.';
+        return 'With this request, you are exceeding the allowed 7 future reservations. You requested '.$reservations_requested.' '.$reservations_requested_text.', and you currently have '.$bankCount.' '.$reservation_text.'. Please remove a reservation, wait until one passes, or choose a different room type.';
       }
     }
   }
