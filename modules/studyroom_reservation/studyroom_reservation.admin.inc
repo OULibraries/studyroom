@@ -398,11 +398,10 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
 
   // if in array, set $space_allows_multiday var to true
   if (in_array($space_id_string, $multi_day_location_list)) {
-    $space_allows_multiday = true;
-
     // if all day, set var to true.
     if (isset($values['field_all_day']['und'][0]['value']) && $values['field_all_day']['und'][0]['value'] == 1) {
       $all_day_reservation = true;
+      $space_allows_multiday = true;
     }
   }
 
@@ -735,7 +734,7 @@ function check_banked_limit($form_state, $entity, $reservations_requested) {
     $type = $entity->type;
 
     // don't check for max values if type is "public" or "UI"
-    if ($type->public || $type->ui) {
+    if ($type == 'public' || $type == 'ui') {
       return true;
     }
 
@@ -768,7 +767,8 @@ function check_banked_limit($form_state, $entity, $reservations_requested) {
 
     // if user has over 7 future reservations, block user from any new reservations
     if ($new_count_with_reservations > 7) {
-      return 'With this request, you are exceeding the allowed 7 future reservations. You requested '.$reservations_requested.' '.$reservations_requested_text.', and you currently have '.$bankCount.' '.$reservation_text.'. Please remove a reservation, wait until one passes, or choose a different room type.';
+      $userID = $GLOBALS['user']->uid;
+      return 'With this request, you are exceeding the allowed 7 future reservations. You requested '.$reservations_requested.' '.$reservations_requested_text.', and you currently have '.$bankCount.' '.$reservation_text.'. Please remove a reservation, wait until one passes, or choose a different room type. <a href="/user/'.$userID.'/reservations"> Current Reservations</a>';
     }
   }
 
@@ -822,12 +822,10 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
   // set up allowed list for multi-day/all day
   $multi_day_location_list = get_long_term_faculty_focus_rooms();
   $space_id_string = $form_state['studyroom']->space->space_id;
-  if (in_array($space_id_string, $multi_day_location_list)) {
-    $space_allows_multiday = true;
-  }
 
-  // set all day to true if it was set in the form
-  if (isset($values['field_all_day']['und'][0]['value']) && $values['field_all_day']['und'][0]['value'] == 1) {
+  // set all day and multi-day to true if it was set in the form
+  if (in_array($space_id_string, $multi_day_location_list) && isset($values['field_all_day']['und'][0]['value']) && $values['field_all_day']['und'][0]['value'] == 1) {
+    $space_allows_multiday = true;
     $all_day_reservation = true;
   }
 

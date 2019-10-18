@@ -32,21 +32,20 @@
     }
   };
 
-  jQuery(document).ready(function () {
+  function hide_repeat_options() {
     $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq option[value='YEARLY']").remove();
     $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq option[value='MONTHLY']").remove();
     $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq option[value='WEEKLY ']").remove();
     $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq").val('DAILY');
     $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq").prop('disabled', true);
+  }
 
-    // hide and show duration if all day checkbox is checked or not. This one is for the edit page. The click event is for either page when the checkbox is checked or unchecked.
+  jQuery(document).ready(function () {
+    hide_repeat_options();
+
     if ($('#edit-field-all-day input[type="checkbox"]').prop("checked") == true) {
       $('.form-item-duration').hide();
-      $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq option[value='YEARLY']").remove();
-      $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq option[value='MONTHLY']").remove();
-      $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq option[value='WEEKLY ']").remove();
-      $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq").val('DAILY');
-      $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq").prop('disabled', true);
+      hide_repeat_options();
     }
 
     $('#edit-field-all-day input[type="checkbox"]').click(function() {
@@ -98,5 +97,9 @@
         $('#edit-field-all-day input[type="checkbox"]').prop("checked", false);
       }
     }
+
+    setTimeout(function () {
+      hide_repeat_options();
+    }, 1000);
   });
 })(jQuery);
