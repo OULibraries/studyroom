@@ -308,6 +308,12 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
   // set order for all day field
   $form['field_all_day']['#weight'] = -14;
 
+  // if editing reservation, uncheck all day checkbox no matter what. Helps control the display of the correct date.
+  if ($entity->reservation_id != "") {
+    $form['field_all_day[und]']['#value'] = 0;
+    $form['field_all_day']['und']['#value'] = 0;
+  }
+
   $form['duration'] = array(
     '#type' => 'select',
     '#title' => t('Duration'),
@@ -516,10 +522,13 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
 
   // if new reservation check if user has hit the "banked reservations" limit of 7 for this room type
   if (empty($entity->reservation_id)) {
-    $check_banked_limit = check_banked_limit($form_state, $entity, count($resv_date_array));
-    if ($check_banked_limit !== TRUE) { //if error is returned
-      form_set_error('', t($check_banked_limit));
-      return;
+    // only check if not admin
+    if ($entity->type != 'admin') {
+      $check_banked_limit = check_banked_limit($form_state, $entity, count($resv_date_array));
+      if ($check_banked_limit !== TRUE) { //if error is returned
+        form_set_error('', t($check_banked_limit));
+        return;
+      }
     }
   }
 }
