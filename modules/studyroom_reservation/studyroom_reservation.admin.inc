@@ -749,20 +749,17 @@ function check_banked_limit($form_state, $entity, $reservations_requested) {
       ->fieldCondition('field_reservation_datetime', 'value', $first_day, '>')
       ->fieldOrderBy('field_reservation_datetime', 'value', 'ASC');
     $results = $query->execute();
-    $resvs = [];
-    if (isset($results['studyroom_reservation'])) {
-      $resvs = array_keys($results['studyroom_reservation']);
-      $bankCount = count($resvs);
-      $reservation_text = $bankCount > 1 ? 'reservations' : 'reservation';
+    $resvs = isset($results['studyroom_reservation']) ? array_keys($results['studyroom_reservation']) : array();
+    $bankCount = count($resvs);
+    $reservation_text = $bankCount == 1 ? 'reservation' : 'reservations';
 
-      // add in requested reservations with reservations the user has over the next 7 days
-      $new_count_with_reservations = $bankCount + $reservations_requested;
-      $reservations_requested_text = $reservations_requested > 1 ? 'reservations' : 'reservation';
+    // add in requested reservations with reservations the user has over the next 7 days
+    $new_count_with_reservations = $bankCount + $reservations_requested;
+    $reservations_requested_text = $reservations_requested == 1 ? 'reservation' : 'reservations';
 
-      // if user has over 7 future reservations, block user from any new reservations
-      if ($new_count_with_reservations > 7) {
-        return 'With this request, you are exceeding the allowed 7 future reservations. You requested '.$reservations_requested.' '.$reservations_requested_text.', and you currently have '.$bankCount.' '.$reservation_text.'. Please remove a reservation, wait until one passes, or choose a different room type.';
-      }
+    // if user has over 7 future reservations, block user from any new reservations
+    if ($new_count_with_reservations > 7) {
+      return 'With this request, you are exceeding the allowed 7 future reservations. You requested '.$reservations_requested.' '.$reservations_requested_text.', and you currently have '.$bankCount.' '.$reservation_text.'. Please remove a reservation, wait until one passes, or choose a different room type.';
     }
   }
 
