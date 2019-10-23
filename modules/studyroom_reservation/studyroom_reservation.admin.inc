@@ -296,6 +296,9 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
         $form['field_all_day[und]']['#type'] = 'hidden';
         $form['field_all_day']['und']['#disabled'] = TRUE;
         $form['field_all_day']['und']['#type'] = 'hidden';
+        unset($form['field_multi_reservation_date_tim']);
+        unset($form_state['field']['field_multi_reservation_date_tim']);
+        unset($form_state['storage']);
       }
     }
   } else { // non faculty/admin reservation. Make sure all day reservation field is hidden.
@@ -303,6 +306,9 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     $form['field_all_day[und]']['#type'] = 'hidden';
     $form['field_all_day']['und']['#disabled'] = TRUE;
     $form['field_all_day']['und']['#type'] = 'hidden';
+    unset($form['field_multi_reservation_date_tim']);
+    unset($form_state['field']['field_multi_reservation_date_tim']);
+    unset($form_state['storage']);
   }
 
   // set order for all day field
@@ -814,6 +820,7 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
 
   // get config of "rules_reservation_email" rule. will be used later to turn off and on the rule as needed.
   $rules_config = rules_config_load('rules_reservation_email');
+  $multi_rules_config = rules_config_load('rules_multi_day_room_reservation_new');
 
   // set defaults for multi-day and all day.
   $space_allows_multiday = false;
@@ -833,6 +840,10 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
 
   // treat as multi-day if it is new (non-edit), faculty or admin, and the space allows multi-day
   if (isset($values['field_multi_reservation_date_tim']) && $space_allows_multiday && ($reservation_type == 'faculty' || $reservation_type == 'admin')) {
+    // disable normal email rule
+    $rules_config->active = FALSE;
+    $rules_config->save();
+
     // if multi day options was requested
     if (isset($values['field_multi_reservation_date_tim']['und'][0]['rrule']) && $values['field_multi_reservation_date_tim']['und'][0]['rrule'] !== NULL) {
       $multi_date = true;
@@ -930,12 +941,12 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
         $entity->reservation_id = NULL;
 
         // set rule to false and save it so an email is not sent
-        $rules_config->active = FALSE;
-        $rules_config->save();
+        $multi_rules_config->active = FALSE;
+        $multi_rules_config->save();
       } else {
         // set email trigger back to active for normal use.
-        $rules_config->active = TRUE;
-        $rules_config->save();
+        $multi_rules_config->active = TRUE;
+        $multi_rules_config->save();
       }
 
       // Save the entity (reservation)
@@ -943,10 +954,12 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
       $res_count++;
     }
   } else { // no multi-date available for reservation type
-    // take out the multi-date field. It is not used in single day submissions.
-    unset($form_state['values']['field_multi_reservation_date_tim']);
+    // disable multi day rule
+    $multi_rules_config->active = FALSE;
+    $multi_rules_config->save();
 
     $entity = entity_ui_controller('studyroom_reservation')->entityFormSubmitBuildEntity($form, $form_state);
+
     // Add in created and changed times.
     if ($entity->is_new = isset($entity->is_new) ? $entity->is_new : 0) {
       $entity->created = time();
@@ -970,7 +983,7 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
     $date = new DateObject($entity->start_time);
   }
 
-  // reactivate rule just in case it was left as false.
+  // reactivate normal rule just in case it was left as false.
   $rules_config->active = TRUE;
   $rules_config->save();
 
