@@ -441,6 +441,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
 
   $studyroom = $form_state['studyroom'];
   $today = date_now();
+  $resv_date_index = 0;
 
   // loop through reservation array (could be multiple or single).
   foreach ($resv_date_array as $resv_date) {
@@ -468,14 +469,24 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
         $end_calc = strtotime($space_day_hours['end_time']);
 
         // check if start time is the same day as "today". If so, it's most likely past when the room opens, so we need to keep the original start time as the reservation start time.
-        // if it is not today, then the start time can be the opening time of the room.
         if ($originalStartTime->format('Y-m-d') == $today->format('Y-m-d')) { //same day
-          $duration = strval($end_calc - $originalStartTime->getTimestamp());
-        } else { // diff day, use opening hr for start time (regardless of what time was requested)
+          $etime = date('Y-m-d H:i:s',ceil(time() / (30 * 60)) * (30 * 60));
+          $entity->start_time = new DateObject($etime, $tz, 'Y-m-d H:i:s');
+          $duration = strval($end_calc - $entity->start_time->getTimestamp());
+        } else { // if it is not today, then the start time can be the opening time of the room.
           $entity->start_time = $space_day_hours['start_time'];
           $duration = strval($end_calc - $start_calc);
         }
       }
+
+      // reset date values in array with new start time based on open hours.
+      $form_state['values']['field_multi_reservation_date_tim']['und'][$resv_date_index]['value'] = $entity->start_time->originalTime;
+
+      if ($resv_date_index == 0) {
+        $form_state['values']['duration'] = $duration;
+      }
+
+      $resv_date_index ++;
     }
 
     // set end time based on new duration (can be all day or as it was requested.
@@ -871,7 +882,7 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
         $date = new DateObject($resv_date_string);
       }
 
-      // if reservation is all day, change start time and duration
+      // if reservation is all day, get duration for each day
       if ($all_day_reservation == true) {
         $resv_date_object = new DateObject($resv_date_string);
         $today = date_now();
@@ -897,8 +908,6 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
             $duration = strval($end_calc - $resv_date_object->getTimestamp());
           }
           else { // diff day, use opening hr for start time (regardless of what time was requested)
-            $resv_date_object = $space_day_hours['start_time'];
-            $resv_date_string = $space_day_hours['start_time']->format('Y-m-d H:i:s');
             $duration = strval($end_calc - $start_calc);
           }
 
@@ -907,10 +916,7 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
       }
 
       //overwrite main date in form to be the current date in the loop. Used in saving the entity as a single date.
-      $form_state['values']['field_reservation_datetime']['und'][0]['value'] = $resv_date_string;
-
-      //overwrite the date in the array with the correct start time used (if all day was checked). This is used in the email text.
-      $form_state['values']['field_multi_reservation_date_tim']['und'][$res_count]['value'] = $resv_date_string;
+      $form_state['values']['field_reservation_datetime']['und'][0]['value'] = $form_state['values']['field_multi_reservation_date_tim']['und'][$res_count]['value'];
 
       // load/update entity with submitted values.
       $entity = entity_ui_controller('studyroom_reservation')->entityFormSubmitBuildEntity($form, $form_state);
