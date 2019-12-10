@@ -1085,3 +1085,38 @@ function studyroom_reservation_delete_form_submit($form, &$form_state) {
 
   $form_state['redirect'] = $form_state['studyroom_redirect_path'];
 }
+
+/**
+ * Delete reservation based on exported csv
+ */
+function studyroom_reservation_delete_by_csv($csv_file = '') {
+  if ($csv_file != '') {
+    // read csv exported from cron process.
+    $csv = array_map('str_getcsv', file($csv_file));
+
+    // get reservation ID in loop and get get the entity object for deletion.
+    if (isset($csv) && count($csv) > 1) {
+      array_shift($csv);
+      foreach($csv as $reservation) {
+        $res_id = $reservation[0];
+        if($res_id != "") {
+          $entity = studyroom_reservation_load($res_id);
+          $entity->delete();
+          echo "Deleted ".$res_id."-";
+        } else {
+          echo 'No additional reservations available for deletion.';
+          return false;
+        }
+
+        // TODO messages not getting id correctly. Appearing as %id in the db.
+        //drupal_set_message(t('Reservation %id has been deleted.', array('%id' => $entity->reservation_id)));
+        //watchdog('studyroom_reservation', 'Deleted reservation %id.', array('%id' => $entity->reservation_id));
+      }
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+  return true;
+}
