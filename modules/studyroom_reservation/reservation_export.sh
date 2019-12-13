@@ -4,7 +4,7 @@
 echo "Exporting reservation data..."
 
 ## Set SITENAME based on first param provided
-SITENAME="kdlibraries"
+SITENAME="libraries"
 
 ## set DRUSH PATH and change to the site's drupal dir
 cd /srv/$SITENAME/drupal || exit
