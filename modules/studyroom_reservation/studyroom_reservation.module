@@ -992,3 +992,13 @@ function _studyroom_reservation_api_return_json($res_ids = array(), $by_date = F
 
   return $resvs;
 }
+
+/**
+ * Remove the breadcrumb if adding a reservation. This helps remove the ability to go to a page that allows changing the room type via dropdown.
+ * This can cause som odd issues with multi-day reservations.
+ */
+function studyroom_reservation_menu_breadcrumb_alter(&$active_trail, $item) {
+  if (strpos($item['path'], 'reservation/add') !== false) {
+    $active_trail = array();
+  }
+}

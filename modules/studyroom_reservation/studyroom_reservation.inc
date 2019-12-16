@@ -65,78 +65,33 @@ class StudyroomReservation extends Entity {
   /**
    * Determine if a conflict exists.
    */
-  public function checkRuleMaxResvPer($user_name = NULL) {
+  public function checkRuleMaxResvPer($user_name = NULL, $resv_date_array) {
+    // get reservation type
     $type = studyroom_reservation_type_load($this->type);
 
+    // don't check for max values if type is "public" or "UI"
     if (!$type->public || !$type->ui) {
       return 0;
     }
 
-    // Load user info.
+    // Load user info
     $account = user_load_by_name($user_name);
     $uid = $account->uid;
 
+    // Load space info
     $space = studyroom_space_load($this->space_id);
     $spaces = studyroom_space_get_spaces_by_type($space->type);
     $space_ids = array_keys($spaces);
-    // Get midnight of first day of week.
-    $selected_day_start = new DateTime($this->start_time_object->originalTime);
-    $weekday = $this->start_time_object->format('w');
-    $week_start = $this->start_time_object->sub(new DateInterval('P' . $weekday . 'D'));
-    $week_start->setTime(0, 0, 0);
-    $selected_day_start->setTime(0, 0, 0);
-    $rule_week_start = $week_start->format('Y-m-d H:i:s');
-    $rule_day_start = $selected_day_start->format('Y-m-d H:i:s');
-
-    // Get weeks end.
-    $week_end = $week_start->add(new DateInterval('P7D'));
-    $rule_week_end = $week_end->format('Y-m-d H:i:s');
-    $day_end = $selected_day_start->add(new DateInterval('P1D'));
-    $rule_day_end = $day_end->format('Y-m-d H:i:s');
-
-    // get user's current reservations for the week
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', 'studyroom_reservation')
-      ->propertyCondition('type', $this->type)
-      ->propertyCondition('space_id', $space_ids, 'IN')
-      ->propertyCondition('uid', $uid)
-      ->fieldCondition('field_reservation_datetime', 'value', array($rule_week_start, $rule_week_end), 'BETWEEN')
-      ->fieldOrderBy('field_reservation_datetime', 'value', 'ASC');
-    $results = $query->execute();
-
-    $resvs = array();
-    if (isset($results['studyroom_reservation'])) {
-      $resvs = array_keys($results['studyroom_reservation']);
-    }
-
-    $weeklyCount = count($resvs);
-
-    // get user's current reservations for the day
-    $query_daily = new EntityFieldQuery();
-    $query_daily->entityCondition('entity_type', 'studyroom_reservation')
-      ->propertyCondition('type', $this->type)
-      ->propertyCondition('space_id', $space_ids, 'IN')
-      ->propertyCondition('uid', $uid)
-      ->fieldCondition('field_reservation_datetime', 'value', array($rule_day_start, $rule_day_end), 'BETWEEN')
-      ->fieldOrderBy('field_reservation_datetime', 'value', 'ASC');
-    $results_daily = $query_daily->execute();
-
-    $resvs_daily = array();
-    if (isset($results_daily['studyroom_reservation'])) {
-      $resvs_daily = array_keys($results_daily['studyroom_reservation']);
-    }
-
-    $dailyCount = count($resvs_daily);
 
     // defaults for the max values
     $max_daily = 1;
     $max_weekly = 7;
 
+    //get max values for space
     $query_studyroom_reservation_type = new EntityFieldQuery();
     $query_studyroom_reservation_type->entityCondition('entity_type', 'studyroom_reservation_type')
       ->entityCondition('entity_type', 'studyroom_reservation_type')
       ->propertyCondition('type', $this->type);
-
     $results_studyroom_reservation_type = $query_studyroom_reservation_type->execute();
     if (isset($results_studyroom_reservation_type['studyroom_reservation_type'])) {
       $items_nids = array_keys($results_studyroom_reservation_type['studyroom_reservation_type']);
@@ -148,31 +103,99 @@ class StudyroomReservation extends Entity {
       }
     }
 
-    $countArray = array('daily' => $dailyCount, 'weekly' => $weeklyCount, 'max_daily' => intval($max_daily), 'max_weekly' => intval($max_weekly));
-    return $countArray;
-  }
+    // set defaults to week counts
+    $week_count_total = 0;
+    $current_week = '';
+    $current_weeklyCount = 0;
+    $week_check = true;
+    $countArray = array();
 
-  /**
-   * Get min/max duration based on user/reservation type.
-   */
-  public function getMinMaxByResType() {
-    $query_studyroom_reservation_type = new EntityFieldQuery();
-    $query_studyroom_reservation_type->entityCondition('entity_type', 'studyroom_reservation_type')
-      ->entityCondition('entity_type', 'studyroom_reservation_type')
-      ->propertyCondition('type', $this->type);
+    // loop through reservations array to check and tally maxes for each week and day.
+    foreach($resv_date_array as $resv_date) {
+      // Get midnight of first day of week and set week and day starts
+      $resv_date_obj = new DateTime($resv_date['value']);
+      $selected_day_start = new DateTime($resv_date['value']);
+      $weekday = $resv_date_obj->format('w');
+      $week_start = $resv_date_obj->sub(new DateInterval('P' . $weekday . 'D'));
+      $week_start->setTime(0, 0, 0);
+      $weeknumber = $week_start->format('W');
+      $dailyCount = 0;
 
-    $results_studyroom_reservation_type = $query_studyroom_reservation_type->execute();
-    if (isset($results_studyroom_reservation_type['studyroom_reservation_type'])) {
-      $items_nids = array_keys($results_studyroom_reservation_type['studyroom_reservation_type']);
-      $items = entity_load('studyroom_reservation_type', $items_nids);
-
-      foreach ($items as $item) {
-        $min_duration = $item->min_duration;
-        $max_duration = $item->max_duration;
+      // looks at current week in the loop and sets variables accordingly. Sets variable to true if it is a new week in regards to previous date in the loop.
+      if ($current_week == '' || $current_week != $weeknumber) { // new week
+        $current_week = $week_start->format('W');
+        $week_count_total = 1;
+        $week_check = true;
+      } else { // same week, add one to the count for max limit checking
+        $week_check = false;
+        $week_count_total++;
       }
-    }
 
-    return array('min_duration' => $min_duration, 'max_duration' => $max_duration);
+      // Set day and week starts.
+      $selected_day_start->setTime(0, 0, 0);
+      $rule_week_start = $week_start->format('Y-m-d H:i:s');
+      $rule_day_start = $selected_day_start->format('Y-m-d H:i:s');
+
+      // Set week and day end
+      $week_end = $week_start->add(new DateInterval('P7D'));
+      $rule_week_end = $week_end->format('Y-m-d H:i:s');
+      $day_end = $selected_day_start->add(new DateInterval('P1D'));
+      $rule_day_end = $day_end->format('Y-m-d H:i:s');
+
+      // get user's current reservations for the week.
+      // Only check once per week sent (if array of dates)
+      if ($week_check === true) {
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'studyroom_reservation')
+          ->propertyCondition('type', $this->type)
+          ->propertyCondition('space_id', $space_ids, 'IN')
+          ->propertyCondition('uid', $uid)
+          ->fieldCondition('field_reservation_datetime', 'value', [
+            $rule_week_start,
+            $rule_week_end
+          ], 'BETWEEN')
+          ->fieldOrderBy('field_reservation_datetime', 'value', 'ASC');
+        $results = $query->execute();
+        $resvs = [];
+        if (isset($results['studyroom_reservation'])) {
+          $resvs = array_keys($results['studyroom_reservation']);
+        }
+        $weeklyCount = $current_weeklyCount = count($resvs);
+      } else { // use previous count since it is the same week. No need to hit the db and check again.
+        $weeklyCount = $current_weeklyCount;
+      }
+
+      // add new count to existing for current total.
+      $weeklyCount = $weeklyCount + $week_count_total;
+
+      // get user's current reservations for the day. Needs to be checked for every date in the array.
+      $query_daily = new EntityFieldQuery();
+      $query_daily->entityCondition('entity_type', 'studyroom_reservation')
+        ->propertyCondition('type', $this->type)
+        ->propertyCondition('space_id', $space_ids, 'IN')
+        ->propertyCondition('uid', $uid)
+        ->fieldCondition('field_reservation_datetime', 'value', [
+          $rule_day_start,
+          $rule_day_end
+        ], 'BETWEEN')
+        ->fieldOrderBy('field_reservation_datetime', 'value', 'ASC');
+      $results_daily = $query_daily->execute();
+      $resvs_daily = [];
+      if (isset($results_daily['studyroom_reservation'])) {
+        $resvs_daily = array_keys($results_daily['studyroom_reservation']);
+      }
+      $dailyCount = count($resvs_daily) + 1;
+
+      // push daily count, weekly count, and the date to an array. Will be added to $countArray and returned and analized to check_if_user_max_reached function in studyroom_reservation.admin.inc
+      array_push($countArray, array('day'=>$resv_date['value'], 'weekly'=>$weeklyCount, 'daily'=>$dailyCount));
+    } // end of foreach($resv_date_array as $resv_date)
+
+    // set up return var with all values
+    $countArray['max_daily'] = intval($max_daily);
+    $countArray['max_weekly'] = intval($max_weekly);
+
+    // return full array with daily and weekly limits per date in the array as well as the max possible for this reservation type.
+    return $countArray;
   }
 }
 

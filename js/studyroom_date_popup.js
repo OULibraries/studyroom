@@ -31,4 +31,75 @@
       }
     }
   };
+
+  function hide_repeat_options() {
+    $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq option[value='YEARLY']").remove();
+    $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq option[value='MONTHLY']").remove();
+    $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq option[value='WEEKLY ']").remove();
+    $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq").val('DAILY');
+    $("#edit-field-multi-reservation-date-tim-und-0-rrule-freq").prop('disabled', true);
+  }
+
+  jQuery(document).ready(function () {
+    hide_repeat_options();
+
+    if ($('#edit-field-all-day input[type="checkbox"]').prop("checked") == true) {
+      $('.form-item-duration').hide();
+      hide_repeat_options();
+    }
+
+    $('#edit-field-all-day input[type="checkbox"]').click(function() {
+      if ($(this).prop("checked") == true) {
+        $('.form-item-duration').hide();
+      } else if($(this).prop("checked") == false) {
+        $('.form-item-duration').show();
+      }
+    });
+
+    if ($('#edit-space-id').val()) {
+      var is_faculty_or_admin = $('body').hasClass('page-reservation-add-admin') || $('body').hasClass('page-reservation-add-faculty') ? 1 : 0;
+
+      if (is_faculty_or_admin === 1) {
+        var space_name = $('#edit-space-id option:selected').text();
+        var is_longterm_room = space_name.includes('Longterm');
+
+        if (is_longterm_room) {
+          $('div.field-name-field-multi-reservation-date-tim').show();
+          $('div.field-name-field-reservation-datetime').hide();
+          $('#edit-field-all-day').show();
+        }
+        else {
+          $('div.field-name-field-multi-reservation-date-tim').hide();
+          $('div.field-name-field-reservation-datetime').show();
+          $('#edit-field-all-day').hide();
+          $('#edit-field-all-day input[type="checkbox"]').prop("checked", false);
+        }
+
+        $('#edit-space-id').on('change', function () {
+          var space_name = $('#edit-space-id option:selected').text();
+          var is_longterm_room = space_name.includes('Longterm');
+
+          if (is_longterm_room) {
+            $('div.field-name-field-multi-reservation-date-tim').show();
+            $('div.field-name-field-reservation-datetime').hide();
+            $('#edit-field-all-day').show();
+          } else {
+            $('div.field-name-field-multi-reservation-date-tim').hide();
+            $('div.field-name-field-reservation-datetime').show();
+            $('#edit-field-all-day').hide();
+            $('#edit-field-all-day input[type="checkbox"]').prop("checked", false);
+          }
+        });
+      } else {
+        $('div.field-name-field-multi-reservation-date-tim').hide();
+        $('div.field-name-field-reservation-datetime').show();
+        $('#edit-field-all-day').hide();
+        $('#edit-field-all-day input[type="checkbox"]').prop("checked", false);
+      }
+    }
+
+    setTimeout(function () {
+      hide_repeat_options();
+    }, 1000);
+  });
 })(jQuery);

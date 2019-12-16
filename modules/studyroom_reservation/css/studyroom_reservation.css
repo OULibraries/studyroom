@@ -12,6 +12,7 @@
   padding: 10px 5px 9px 10px;
   position: relative;
 }
+
 .studyroom-reservation-type-list li:last-child {
   border: 0 none;
 }
@@ -20,10 +21,59 @@
   display:none;
 }
  
- #studyroom-reservation-edit-form #edit-space-id-display label {
-   display:none;
-  }
- 
-  #studyroom-reservation-edit-form #edit-space-id-display {
-    font-size: 2em;
-  }
+#studyroom-reservation-edit-form #edit-space-id-display label {
+  display:none;
+}
+
+#studyroom-reservation-edit-form #edit-space-id-display {
+  font-size: 2em;
+}
+
+/* hide the normal date input field for faculty/admin form only. And hide the multi-date input on the edit form. */
+body.page-reservation-add-faculty div#edit-field-reservation-datetime, body.page-reservation-add-admin div#edit-field-reservation-datetime, body.page-reservation-edit div#edit-field-multi-reservation-date-tim {
+  display: none;
+}
+
+#edit-field-multi-reservation-date-tim-und-0-rrule-weekly-interval,
+#edit-field-multi-reservation-date-tim-und-0-rrule-daily-interval-child,
+#edit-field-multi-reservation-date-tim-und-0-rrule-count-child,
+#edit-field-multi-reservation-date-tim-und-0-rrule-monthly-bymonthday-bymonth-child-bymonthday,
+#edit-field-multi-reservation-date-tim-und-0-rrule-count-child,
+#edit-field-multi-reservation-date-tim-und-0-rrule-yearly-interval,
+#edit-field-multi-reservation-date-tim-und-0-rrule-yearly-bymonthday-bymonth-child-bymonthday,
+#edit-field-multi-reservation-date-tim-und-0-rrule-count-child {
+  width: 100px;
+}
+
+#repeat-settings-fieldset .control-label {
+  margin-top: 10px;
+  margin-bottom: 0px;
+}
+
+#repeat-settings-fieldset .monthly .form-checkbox {
+  margin-right: 5px;
+}
+
+.form-item-field-multi-reservation-date-tim-und-0-rrule-monthly-byday-bymonth-child-byday-count select,
+.form-item-field-multi-reservation-date-tim-und-0-rrule-monthly-byday-bymonth-child-byday-day select {
+  float: none;
+  width: 100px;
+}
+
+.form-item-field-multi-reservation-date-tim-und-0-rrule-monthly-bymonthday-bymonth-child-bymonthday,
+.form-item-field-multi-reservation-date-tim-und-0-rrule-monthly-byday-bymonth-child-byday-count {
+  margin-top: 10px;
+}
+
+.form-item-field-multi-reservation-date-tim-und-0-rrule-monthly-byday-bymonth-child-byday-day {
+  margin-top: 11px;
+}
+
+.until,
+.weekly,
+.form-item-field-multi-reservation-date-tim-und-0-rrule-show-additions,
+.form-item-field-multi-reservation-date-tim-und-0-rrule-weekly-interval,
+.form-item-field-multi-reservation-date-tim-und-0-rrule-weekly-byday,
+.form-item-field-multi-reservation-date-tim-und-0-rrule-daily-byday-radios {
+  display: none !important;
+}
