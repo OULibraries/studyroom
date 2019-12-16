@@ -426,11 +426,6 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
     //set reservation array and timezone.
     $resv_date_array = $values['field_multi_reservation_date_tim'][$multi_res_lang];
     $tz = $form['field_multi_reservation_date_tim'][$multi_res_lang][0]['#date_timezone'];
-
-    // remove last two in the array. They are not related to the dates we need to loop through.
-    if ($multi_date === false) {
-      array_pop($resv_date_array);
-    }
   } else {
     // reservation type is  not faculty or admin and will not have multi-dates.
     // Treat as a traditional reservation and get the value from the older input, but set it as a single index array so it can be processed the same as multi-date.
