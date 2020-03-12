@@ -1,0 +1,15 @@
+name = Studyroom Reservation
+description = Processes Studyroom space registration requests
+core = 8.x
+package = Study Room
+type: module
+core_version_requirement: ^8 || ^9
+project = "studyroom_reservation"
+datestamp = "1584030502"
+
+dependencies:
+  - studyroom:studyroom
+  - studyroom:studyroom_space
+  - drupal:number
+
+configure = admin/studyroom/reservation/

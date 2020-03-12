@@ -1,0 +1,4 @@
+studyroom_hours:
+  version: 1.x
+  css:
+    css/studyroom_hours.css: {}

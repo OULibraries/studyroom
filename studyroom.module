@@ -7,6 +7,7 @@
 
 define('STUDYROOM_MENU', 'admin/studyroom');
 
+module_load_include('inc', 'studyroom', 'studyroom');
 /**
  * Implements hook_help().
  */

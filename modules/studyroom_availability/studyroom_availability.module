@@ -5,6 +5,7 @@
  * Main module for the studyroom availabily.
  */
 
+module_load_include('inc', 'studyroom_availability', 'studyroom_availability');
 
 /**
  * Implements hook_menu().

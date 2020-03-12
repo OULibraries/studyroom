@@ -5,6 +5,13 @@
  */
 
 define('STUDYROOM_CLOSED_MENU_ADMIN_SPACE', 'admin/studyroom/closed');
+module_load_include('inc', 'studyroom_closed', 'studyroom_closed');
+module_load_include('inc', 'studyroom_closed', 'studyroom_closed.admin');
+module_load_include('inc', 'studyroom_closed', 'views/studyroom_closed_handler_delete_link_field');
+module_load_include('inc', 'studyroom_closed', 'views/studyroom_closed_handler_edit_link_field');
+module_load_include('inc', 'studyroom_closed', 'views/studyroom_closed_handler_operations_field');
+module_load_include('inc', 'studyroom_closed', 'views/studyroom_closed_handler_spaces_field');
+module_load_include('inc', 'studyroom_closed', 'views/studyroom_closed_handler_conflict_field');
 
 /**
  * Implements hook_entity_info().

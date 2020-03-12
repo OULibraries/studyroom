@@ -1,0 +1,12 @@
+name = Studyroom Devel Generate
+description = Generate dummy spaces and reservations.
+core = 8.x
+package = Study Room
+type: module
+core_version_requirement: ^8 || ^9
+project = "studyroom_devel_generate"
+datestamp = "1584030502"
+
+dependencies:
+  - drupal:devel
+  - drupal:devel_generate

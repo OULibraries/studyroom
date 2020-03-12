@@ -1,0 +1,4 @@
+studyroom_reservation:
+  version: 1.x
+  css:
+    css/studyroom_reservation.css: {}

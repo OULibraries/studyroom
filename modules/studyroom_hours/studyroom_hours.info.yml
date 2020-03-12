@@ -1,0 +1,11 @@
+name = Studyroom Hours
+description = Defines a weekday hours field type for use by Studyroom locations and spaces.
+core = 8.x
+package = Study Room
+type: module
+core_version_requirement: ^8 || ^9
+project = "studyroom_hours"
+datestamp = "1584030502"
+
+dependencies:
+  - studyroom:studyroom_reservation

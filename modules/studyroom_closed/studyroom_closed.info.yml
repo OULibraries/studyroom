@@ -1,0 +1,19 @@
+name = Studyroom Closed
+description = Provides functionality to create a special reservation indicating a closed Studyroom Space
+core = 8.x
+package = Study Room
+type: module
+core_version_requirement: ^8 || ^9
+project = "studyroom_closed"
+datestamp = "1584030502"
+
+dependencies:
+  - studyroom:studyroom_reservation
+  - drupal:date_all_day
+  - drupal:date_repeat_field
+
+configure = admin/studyroom/reservation/closed
+
+
+
+

@@ -5,6 +5,18 @@
  * Module for the studyroom_reservation.
  */
 
+module_load_include('inc', 'studyroom_reservation', 'studyroom_reservation');
+module_load_include('inc', 'studyroom_reservation', 'studyroom_reservation.admin');
+module_load_include('inc', 'studyroom_reservation', 'studyroom_reservation_type.admin');
+module_load_include('inc', 'studyroom_reservation', 'views/studyroom_reservation_handler_field_link');
+module_load_include('inc', 'studyroom_reservation', 'views/studyroom_reservation_handler_field_link_delete');
+module_load_include('inc', 'studyroom_reservation', 'views/studyroom_reservation_handler_field_link_edit');
+module_load_include('inc', 'studyroom_reservation', 'views/studyroom_reservation_handler_field_operations');
+module_load_include('inc', 'studyroom_reservation', 'views/studyroom_reservation_handler_field_space');
+module_load_include('inc', 'studyroom_reservation', 'views/studyroom_reservation_handler_field_type');
+module_load_include('inc', 'studyroom_reservation', 'views/studyroom_reservation_handler_filter_type');
+module_load_include('inc', 'studyroom_reservation', 'views/studyroom_reservation_handler_filter_space');
+
 define('STUDYROOM_RESERVATION_ADMIN_PATH', 'admin/content/reservation');
 define('STUDYROOM_RESERVATION_TYPE_ADMIN_PATH', STUDYROOM_MENU . '/reservation/type');
 define('STUDYROOM_RESERVATION_PATH', 'reservation/');

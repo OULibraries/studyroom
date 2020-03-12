@@ -1,0 +1,4 @@
+studyroom_devel_generate:
+  version: 1.x
+  css:
+    css/studyroom_devel_generate.css: {}

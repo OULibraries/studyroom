@@ -5,6 +5,17 @@
  * Module for the studyroom_space.
  */
 
+module_load_include('inc', 'studyroom_space', 'studyroom_space');
+module_load_include('inc', 'studyroom_space', 'studyroom_space.admin');
+module_load_include('inc', 'studyroom_space', 'studyroom_space_location.admin');
+module_load_include('inc', 'studyroom_space', 'views/studyroom_space_handler_field_link');
+module_load_include('inc', 'studyroom_space', 'views/studyroom_space_handler_field_link_delete');
+module_load_include('inc', 'studyroom_space', 'views/studyroom_space_handler_field_link_edit');
+module_load_include('inc', 'studyroom_space', 'views/studyroom_space_handler_field_operations');
+module_load_include('inc', 'studyroom_space', 'views/studyroom_space_handler_field_type');
+module_load_include('inc', 'studyroom_space', 'views/studyroom_space_handler_field_max_days_advance');
+module_load_include('inc', 'studyroom_space', 'views/studyroom_space_handler_filter_type');
+
 define('STUDYROOM_SPACE_MENU_SPACE', STUDYROOM_MENU . '/space');
 define('STUDYROOM_SPACE_MENU_LOCATION', STUDYROOM_MENU . '/locations');
 define('STUDYROOM_SPACE_PATH', 'space/');

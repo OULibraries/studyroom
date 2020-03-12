@@ -1,0 +1,4 @@
+studyroom:
+  version: 1.x
+  js:
+    js/studyroom_date_popup.js: {}
