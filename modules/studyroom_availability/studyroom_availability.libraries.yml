@@ -1,4 +1,5 @@
 studyroom_availability:
   version: 1.x
   css:
-    css/studyroom_availability.css: {}
+    theme:
+      css/studyroom_availability.css: {}
