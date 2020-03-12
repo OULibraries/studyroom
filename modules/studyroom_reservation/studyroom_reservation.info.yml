@@ -1,11 +1,8 @@
-name = Studyroom Reservation
-description = Processes Studyroom space registration requests
-core = 8.x
-package = Study Room
+name: Studyroom Reservation
+description: Processes Studyroom space registration requests
+package: Study Room
 type: module
-core_version_requirement: ^8 || ^9
-project = "studyroom_reservation"
-datestamp = "1584030502"
+core: 8.x
 
 dependencies:
   - studyroom:studyroom

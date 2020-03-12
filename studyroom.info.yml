@@ -1,10 +1,12 @@
-name = Studyroom
-description = Provides basic underlying functionality and configuration options used by all studyroom modules.
-core = 8.x
-version = "8.x-2.x"
-package = Study Room
+name: Studyroom
+description: Provides basic underlying functionality and configuration options used by all studyroom modules.
+package: Study Room
 type: module
-core_version_requirement: ^8 || ^9
-project = "studyroom"
-datestamp = "1584030502"
+core: 8.x
+version: "8.x-2.x"
+
+dependencies:
+  - studyroom:studyroom
+  - drupal:taxonomy
+
 configure = admin/config/studyroom

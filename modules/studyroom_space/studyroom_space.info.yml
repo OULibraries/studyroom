@@ -1,14 +1,11 @@
-name = Studyroom Space
-description = Create and display Studyroom locations and spaces.
-core = 8.x
-package = Study Room
+name: Studyroom Space
+description: Create and display Studyroom locations and spaces.
+package: Study Room
 type: module
-core_version_requirement: ^8 || ^9
-project = "studyroom_space"
-datestamp = "1584030502"
+core: 8.x
 
 dependencies:
   - studyroom:studyroom
   - drupal:taxonomy
 
-configure = admin/studyroom/locations
+  configure = admin/studyroom/locations

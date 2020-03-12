@@ -1,11 +1,8 @@
-name = Studyroom Availability
-description = Checks and displays space availability.
-core = 8.x
-package = Study Room
+name: Studyroom Availability
+description: Studyroom Availability
+package: Study Room
 type: module
-core_version_requirement: ^8 || ^9
-project = "studyroom_availability"
-datestamp = "1584030502"
+core: 8.x
 
 dependencies:
   - studyroom:studyroom_reservation

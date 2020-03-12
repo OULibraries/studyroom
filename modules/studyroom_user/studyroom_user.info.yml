@@ -1,11 +1,8 @@
-name = Studyroom User
-description = Add tabs to user profile to show past/future reservations.
-core = 8.x
-package = Study Room
+name: Studyroom User
+description: Add tabs to user profile to show past/future reservations.
+package: Study Room
 type: module
-core_version_requirement: ^8 || ^9
-project = "studyroom_user"
-datestamp = "1584030502"
+core: 8.x
 
 dependencies:
   - studyroom:studyroom_reservation
