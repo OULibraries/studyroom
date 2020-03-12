@@ -4,9 +4,7 @@ package: Study Room
 type: module
 core: 8.x
 version: "8.x-2.x"
-
+configure: admin/config/studyroom
 dependencies:
   - studyroom:studyroom
   - drupal:taxonomy
-
-configure = admin/config/studyroom

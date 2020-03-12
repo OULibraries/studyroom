@@ -3,9 +3,7 @@ description: Create and display Studyroom locations and spaces.
 package: Study Room
 type: module
 core: 8.x
-
+configure: admin/studyroom/locations
 dependencies:
   - studyroom:studyroom
   - drupal:taxonomy
-
-  configure = admin/studyroom/locations

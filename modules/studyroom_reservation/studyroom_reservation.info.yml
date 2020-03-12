@@ -3,10 +3,8 @@ description: Processes Studyroom space registration requests
 package: Study Room
 type: module
 core: 8.x
-
+configure: admin/studyroom/reservation/
 dependencies:
   - studyroom:studyroom
   - studyroom:studyroom_space
   - drupal:number
-
-configure = admin/studyroom/reservation/

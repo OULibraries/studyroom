@@ -3,10 +3,8 @@ description: Provides functionality to create a special reservation indicating a
 package: Study Room
 type: module
 core: 8.x
-
+configure: admin/studyroom/reservation/closed
 dependencies:
   - studyroom:studyroom_reservation
   - drupal:date_all_day
   - drupal:date_repeat_field
-
-configure = admin/studyroom/reservation/closed
