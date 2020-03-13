@@ -7,4 +7,3 @@ configure: admin/studyroom/reservation/
 dependencies:
   - studyroom:studyroom
   - studyroom:studyroom_space
-  - drupal:number

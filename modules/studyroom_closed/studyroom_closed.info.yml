@@ -7,4 +7,3 @@ configure: admin/studyroom/reservation/closed
 dependencies:
   - studyroom:studyroom_reservation
   - drupal:date_all_day
-  - drupal:date_repeat_field
