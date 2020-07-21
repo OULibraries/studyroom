@@ -38,21 +38,23 @@ class StudyroomReservation extends Entity {
   }
 
   /**
-   * Determine if a conflict exists.
+   * Determine if a conflict exists
+   * !!!!WITH 2 hr buffer. Original function comment out below
    */
   public function checkConflict() {
     $conflict = FALSE;
     $reservations = studyroom_reservation_per_space_per_day($this->space_id, $this->start_time->format('Y-m-d'), $this);
     $this->start_time_object = $this->start_time;
+    date_default_timezone_set("America/Chicago");
     $this->start_time = $this->start_time->format('U');
     $this->end_time = $this->end_time->format('U');
 
     foreach ($reservations as $current) {
-      if ($current->end_time <= $this->start_time) {
+      if (($current->end_time+7200) <= intval($this->start_time)) {
         // This start time is after this reservation end time, so OK.
         continue;
       }
-      if ($this->end_time > $current->start_time) {
+      if ($current->start_time < (intval($this->end_time)+7200)) {
         // End time is past start time of this reservation, so no good.
         $conflict = TRUE;
         $this->conflict_resv_ids[] = $current->reservation_id;
@@ -61,6 +63,32 @@ class StudyroomReservation extends Entity {
 
     return $conflict;
   }
+
+
+//  /**
+//   * Determine if a conflict exists.
+//   */
+//  public function checkConflict() {
+//    $conflict = FALSE;
+//    $reservations = studyroom_reservation_per_space_per_day($this->space_id, $this->start_time->format('Y-m-d'), $this);
+//    $this->start_time_object = $this->start_time;
+//    $this->start_time = $this->start_time->format('U');
+//    $this->end_time = $this->end_time->format('U');
+//
+//    foreach ($reservations as $current) {
+//      if ($current->end_time <= $this->start_time) {
+//        // This start time is after this reservation end time, so OK.
+//        continue;
+//      }
+//      if ($this->end_time > $current->start_time) {
+//        // End time is past start time of this reservation, so no good.
+//        $conflict = TRUE;
+//        $this->conflict_resv_ids[] = $current->reservation_id;
+//      }
+//    }
+//
+//    return $conflict;
+//  }
 
   /**
    * Determine if a conflict exists.
