@@ -994,8 +994,10 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
       $multi_rules_config->active = FALSE;
       $multi_rules_config->save();
 
-      // add COVID buffer reservation
-      add_reservation_buffer(7200, $entity);
+      // add COVID buffer reservation. No need to add for all day reservations
+      if ($all_day_reservation == false) {
+        add_reservation_buffer(7200, $entity);
+      }
 
       $res_count++;
     }

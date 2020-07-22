@@ -50,7 +50,7 @@ class StudyroomReservation extends Entity {
     $this->end_time = $this->end_time->format('U');
 
     foreach ($reservations as $current) {
-      if (($current->end_time+7200) <= intval($this->start_time)) {
+      if ($current->end_time <= intval($this->start_time)) {
         // This start time is after this reservation end time, so OK.
         continue;
       }
