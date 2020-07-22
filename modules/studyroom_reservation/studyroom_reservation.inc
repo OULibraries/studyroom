@@ -388,7 +388,11 @@ class StudyroomReservationController extends EntityAPIController {
         $reservation->label = $function();
       }
       else {
-        $reservation->label = t('Busy');
+        if ($reservation->type == 'internal_rooms') {
+          $reservation->label = t('Unavailable');
+        } else {
+          $reservation->label = t('Busy');
+        }
       }
     }
 
