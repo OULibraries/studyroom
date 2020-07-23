@@ -1125,11 +1125,28 @@ function studyroom_reservation_delete_form($form, &$form_state, $entity) {
  */
 function studyroom_reservation_delete_form_submit($form, &$form_state) {
   $entity = $form_state['studyroom_reservation'];
+  $entity_id = $entity->reservation_id;
   $entity->delete();
+  watchdog('studyroom_reservation', 'Deleted reservation %id.', array('%id' => $entity_id));
 
-  drupal_set_message(t('Reservation %id has been deleted.', array('%id' => $entity->reservation_id)));
-  watchdog('studyroom_reservation', 'Deleted reservation %id.', array('%id' => $entity->reservation_id));
+  //delete buffer reservation(s) if applicable
+  $entity_id_buffer_after = intval($entity_id) + 1;
+  $entity_id_buffer_before = $entity_id_buffer_after + 1;
 
+  //Check if these are "internal_room" buffer reservations before deleting
+  $entity_after = studyroom_reservation_load($entity_id_buffer_after);
+  if (isset($entity_after) && $entity_after->type == 'internal_rooms') {
+    $entity_after->delete();
+    watchdog('studyroom_reservation', 'Deleted reservation %id.', array('%id' => $entity_id_buffer_after));
+  }
+
+  $entity_before = studyroom_reservation_load($entity_id_buffer_before);
+  if (isset($entity_before) && $entity_before->type == 'internal_rooms') {
+    $entity_before->delete();
+    watchdog('studyroom_reservation', 'Deleted reservation %id.', array('%id' => $entity_id_buffer_before));
+  }
+
+  drupal_set_message(t('Reservation %id has been deleted.', array('%id' => $entity_id)));
   $form_state['redirect'] = $form_state['studyroom_redirect_path'];
 }
 
