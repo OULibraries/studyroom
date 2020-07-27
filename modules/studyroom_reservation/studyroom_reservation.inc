@@ -54,7 +54,7 @@ class StudyroomReservation extends Entity {
         // This start time is after this reservation end time, so OK.
         continue;
       }
-      if ($current->start_time < (intval($this->end_time)+7200)) {
+      if ($current->start_time < intval($this->end_time)) {
         // End time is past start time of this reservation, so no good.
         $conflict = TRUE;
         $this->conflict_resv_ids[] = $current->reservation_id;
