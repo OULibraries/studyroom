@@ -276,12 +276,12 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
     }
 
     // Set default date/time for existing date input and multidate input
-    $lang = $form['field_reservation_datetime']['#language'];
+    $lang = isset($form['field_reservation_datetime']['#language']) ? $form['field_reservation_datetime']['#language'] : 'und';
     $form['field_reservation_datetime'][$lang][0]['#default_value']['value'] = $date_time->format('Y-m-d h:i a');
   }
 
   if ($studyroom_reservation_type->type == 'faculty' || $studyroom_reservation_type->type == 'admin') {
-    $lang_multi = $form['field_multi_reservation_date_tim']['#language'];
+    $lang_multi = isset($form['field_multi_reservation_date_tim']['#language']) ? $form['field_multi_reservation_date_tim']['#language'] : 'und';
     $form['field_multi_reservation_date_tim'][$lang_multi][0]['#default_value']['value'] = $date_time->format('Y-m-d h:i a');
 
     $multi_day_location_list = get_long_term_faculty_focus_rooms();
@@ -416,7 +416,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   // Also check if there is a reservation id passed in. If so, treat as a single date and skip any multi-date input.
   if (($entity->type == 'faculty' || $entity->type == 'admin') && empty($entity->reservation_id) && $space_allows_multiday) {
     // gets the variable set in the array so it can be referenced. Usually set to something like 'und'
-    $multi_res_lang = $form['field_multi_reservation_date_tim']['#language'];
+    $multi_res_lang = isset($form['field_multi_reservation_date_tim']['#language']) ? $form['field_multi_reservation_date_tim']['#language'] : 'und';
 
     // if multi day options were requested, set multi-date to true
     if (isset($values['field_multi_reservation_date_tim'][$multi_res_lang][0]['rrule']) && $values['field_multi_reservation_date_tim'][$multi_res_lang][0]['rrule'] !== NULL) {
@@ -434,7 +434,7 @@ function studyroom_reservation_edit_form_validate(&$form, &$form_state) {
   } else {
     // reservation type is  not faculty or admin and will not have multi-dates.
     // Treat as a traditional reservation and get the value from the older input, but set it as a single index array so it can be processed the same as multi-date.
-    $langcode = $form['field_reservation_datetime']['#language'];
+    $langcode = isset($form['field_reservation_datetime']['#language']) ? $form['field_reservation_datetime']['#language'] : 'und';
     $resv_date_array = $values['field_reservation_datetime'][$langcode];
     $tz = $form['field_reservation_datetime'][$langcode][0]['#date_timezone'];
   }
@@ -813,6 +813,65 @@ function get_long_term_faculty_focus_rooms() {
 }
 
 /**
+ * add COVID reservation buffer using the internal reservation type.
+ */
+function add_reservation_buffer($bufferTimeInSeconds,$reservation_entity) {
+  //  clone reservation object and alter. Set these things to NULL to treat as new entity/reservation
+  //  $reservation_entity = clone $reservation_entity;
+  $original_reservation_entity_start_time = $reservation_entity->start_time;
+  $original_reservation_entity_end_time = $reservation_entity->end_time;
+  $reservation_entity->uuid->value = NULL;
+  $reservation_entity->nid->value = NULL;
+  $reservation_entity->is_new = 1;
+  $reservation_entity->reservation_id = NULL;
+  $reservation_entity->type = 'internal_rooms';
+  $reservation_entity->created = time();
+  $reservation_entity->changed = time();
+  $reservation_entity->uid = 0;
+  unset($reservation_entity->user_name);
+
+  // set after buffer data
+  // set new date values and duration
+  // start time is = to the end time of the cloned entity
+  $new_end_time = intval($original_reservation_entity_end_time)+$bufferTimeInSeconds;
+  $newStartDate = new DateTime('now', new DateTimeZone('America/Chicago'));
+  $newStartDate->setTimestamp($original_reservation_entity_end_time);
+  $startDateFormatted = $newStartDate->format("Y-m-d H:i:s");
+  $reservation_entity->start_time_object->setTimestamp($original_reservation_entity_end_time);
+  $reservation_entity->start_time_object->originalTime = $startDateFormatted;
+  $reservation_entity->field_reservation_datetime['und'][0]['value'] = $startDateFormatted;
+  $reservation_entity->field_reservation_datetime['und'][0]['value2'] = $startDateFormatted;
+  $reservation_entity->start_time = $original_reservation_entity_end_time;
+  $reservation_entity->end_time = (string)$new_end_time;
+  $reservation_entity->duration = $bufferTimeInSeconds;
+
+  $reservation_entity->save();
+  
+  //set before buffer
+  $reservation_entity->uuid->value = NULL;
+  $reservation_entity->nid->value = NULL;
+  $reservation_entity->is_new = 1;
+  $reservation_entity->reservation_id = NULL;
+  $reservation_entity->created = time();
+  $reservation_entity->changed = time();
+  $reservation_entity->uid = 0;
+
+  // set new date values and duration
+  // end time is = to the start time of the orig object
+  $startDateBefore = new DateTime('now', new DateTimeZone('America/Chicago'));
+  $startDateBefore->setTimestamp($original_reservation_entity_start_time-$bufferTimeInSeconds);
+  $startDateFormatted = $startDateBefore->format("Y-m-d H:i:s");
+  $new_end_time = intval($original_reservation_entity_start_time);
+  $reservation_entity->start_time_object->setTimestamp($startDateBefore->getTimestamp());
+  $reservation_entity->start_time_object->originalTime = $startDateFormatted;
+  $reservation_entity->field_reservation_datetime['und'][0]['value'] = $startDateFormatted;
+  $reservation_entity->field_reservation_datetime['und'][0]['value2'] = $startDateFormatted;
+  $reservation_entity->start_time = (string)$startDateBefore->getTimestamp();
+  $reservation_entity->end_time = (string)$new_end_time;
+  $reservation_entity->duration = $bufferTimeInSeconds;
+  $reservation_entity->save();
+}
+/**
  * Form API submit callback for the studyroom_reservation form. Saves the reservation(s) after submitted.
  *
  * @todo remove hard-coded link
@@ -957,6 +1016,15 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
 
       // Save the entity (reservation)
       $entity->save();
+
+      $multi_rules_config->active = FALSE;
+      $multi_rules_config->save();
+
+      // add COVID buffer reservation. No need to add for all day reservations
+      if ($all_day_reservation == false) {
+        add_reservation_buffer(7200, $entity);
+      }
+
       $res_count++;
     }
   } else { // no multi-date available for reservation type
@@ -984,6 +1052,11 @@ function studyroom_reservation_edit_form_submit(&$form, &$form_state) {
 
     // save the entity (reservation)
     $entity->save();
+
+    $rules_config->active = FALSE;
+    $rules_config->save();
+    // add COVID buffer reservation
+    add_reservation_buffer(7200, $entity);
 
     // Get year/week to redirect to correct week of reservation.
     $date = new DateObject($entity->start_time);
@@ -1078,11 +1151,28 @@ function studyroom_reservation_delete_form($form, &$form_state, $entity) {
  */
 function studyroom_reservation_delete_form_submit($form, &$form_state) {
   $entity = $form_state['studyroom_reservation'];
+  $entity_id = $entity->reservation_id;
   $entity->delete();
+  watchdog('studyroom_reservation', 'Deleted reservation %id.', array('%id' => $entity_id));
 
-  drupal_set_message(t('Reservation %id has been deleted.', array('%id' => $entity->reservation_id)));
-  watchdog('studyroom_reservation', 'Deleted reservation %id.', array('%id' => $entity->reservation_id));
+  //delete buffer reservation(s) if applicable
+  $entity_id_buffer_after = intval($entity_id) + 1;
+  $entity_id_buffer_before = $entity_id_buffer_after + 1;
 
+  //Check if these are "internal_room" buffer reservations before deleting
+  $entity_after = studyroom_reservation_load($entity_id_buffer_after);
+  if (isset($entity_after) && $entity_after->type == 'internal_rooms') {
+    $entity_after->delete();
+    watchdog('studyroom_reservation', 'Deleted reservation %id.', array('%id' => $entity_id_buffer_after));
+  }
+
+  $entity_before = studyroom_reservation_load($entity_id_buffer_before);
+  if (isset($entity_before) && $entity_before->type == 'internal_rooms') {
+    $entity_before->delete();
+    watchdog('studyroom_reservation', 'Deleted reservation %id.', array('%id' => $entity_id_buffer_before));
+  }
+
+  drupal_set_message(t('Reservation %id has been deleted.', array('%id' => $entity_id)));
   $form_state['redirect'] = $form_state['studyroom_redirect_path'];
 }
 
