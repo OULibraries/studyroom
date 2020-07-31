@@ -338,15 +338,16 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
   // handler to preserve any submit handlers added by a form callback_wrapper.
   $submit = array();
 
-  if (!empty($form['#submit'])) {
-    $submit += $form['#submit'];
+  if ($entity->is_new) {
+    if (!empty($form['#submit'])) {
+      $submit += $form['#submit'];
+    }
+    $form['actions']['submit'] = [
+      '#type' => 'submit',
+      '#value' => t('Save reservation'),
+      '#submit' => $submit + ['studyroom_reservation_edit_form_submit'],
+    ];
   }
-
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save reservation'),
-    '#submit' => $submit + array('studyroom_reservation_edit_form_submit'),
-  );
 
   $delete_button = TRUE;
   if ($entity->isLocked()) {
@@ -358,7 +359,7 @@ function studyroom_reservation_edit_form($form, &$form_state, $entity, $space = 
   $path = user_access('access reservations overview') ? STUDYROOM_RESERVATION_ADMIN_PATH : 'user/' . $GLOBALS['user']->uid . '/reservations';
   $form['actions']['delete'] = array(
     '#type' => 'submit',
-    '#value' => t('Delete reservation'),
+    '#value' => t('Delete reservation (editing currently disabled)'),
     '#suffix' => l(t('Cancel'), $path),
     '#submit' => array('studyroom_reservation_form_submit_delete'),
     '#weight' => 45,
