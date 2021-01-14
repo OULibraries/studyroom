@@ -579,7 +579,7 @@ function check_if_date_covers_two_days($start_time, $end_time) {
  */
 function check_if_date_within_max_days_advance($studyroom, $today, $start_time) {
   if (isset($studyroom->max_days_advance)) {
-    // new temp check to block reservations passed 01/14/2021
+    // new temp check to block reservations passed 05/14/2021
     // -------- TODO remove when blocker is over ------------
     $blocker_date = new DateObject('2021-05-15 00:00:00');
     if ($start_time > $blocker_date) {
