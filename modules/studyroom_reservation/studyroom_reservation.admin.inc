@@ -579,6 +579,14 @@ function check_if_date_covers_two_days($start_time, $end_time) {
  */
 function check_if_date_within_max_days_advance($studyroom, $today, $start_time) {
   if (isset($studyroom->max_days_advance)) {
+    // new temp check to block reservations passed 05/14/2021
+    // -------- TODO remove when blocker is over ------------
+    $blocker_date = new DateObject('2021-05-15 00:00:00');
+    if ($start_time > $blocker_date) {
+      return 'To prepare for a new room reservation system, OU Libraries is not allowing room reservations after May 14th, 2021';
+    }
+    // -------- TODO remove when blocker is over ------------
+
     if ($today->difference($start_time, 'days', FALSE) > $studyroom->max_days_advance) {
       $number_of_days = format_plural($studyroom->max_days_advance, '1 day', '@count days');
       return 'Your reservation at '.str_replace(' America/Chicago', '', $start_time).' is beyond the limit of '.$number_of_days.' in the future.';
